@@ -1,8 +1,9 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/UserModel.js");
-const generateToken = require("../middleware/generateToken.js");
+const { generateToken} = require("../middleware/generateToken.js");
 const nodemailer = require("nodemailer");
 const dotenv =require('dotenv')
+// const bcrypt =require('bcrypt')
 dotenv.config({
   path: './.env',
 });
@@ -18,7 +19,7 @@ const generateOTP = (length) => {
   }
   return otp;
 }
-console.log("auth", process.env.PASSWORD)
+// console.log("auth", process.env.PASSWORD)
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -34,77 +35,91 @@ const transporter = nodemailer.createTransport({
 // Signup
 const signup = async (req, res) => {
   try {
-    const { name, email, password, phoneno } = req.body;
+    const { fullname ,username, email, password, phone } = req.body;
 
     // Check if user exists
     const userExists = await User.findOne({ email });
+    
     if (userExists) return res.status(400).json({ error: "User already exists!" });
 
     const otp = generateOTP(4);
-    // console.log(otp);
+    console.log(otp);
 
-    tempUserStore[email] = { name, email, password, otp };
+    tempUserStore[email] = { username,fullname, email, password, otp, phone };
+console.log(tempUserStore);
 
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
-      subject: `Hello! ${name}, Please Verify Your OTP`,
+      subject: `Hello! ${fullname}, Please Verify Your OTP`,
       html: `<strong>Your OTP code for Signup  is: ${otp}</strong>`,
     };
+    // console.log(mailOptions);
+    
     try {
       const data = await transporter.sendMail(mailOptions);
       console.log("data", data);
-      res.status(200).json(new Apiresponse(200, email, "OTP sent successfully"));
+      res.status(200).json((200, email, "OTP sent successfully"));
     } catch (error) {
-      throw new ApiError(500, `Error while sending OTP: ${error}`);
+      res.status(500).json({ error: error.message });
     }
   } catch (error) {
     res.status(500).json({ error });
   }
 }
 
-const verifyOtp = async (req, res, next) => {
+
+
+const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
     const storedUser = tempUserStore[email];
+console.log(storedUser);
+
     if (!storedUser) {
-      throw new ApiError(400, "No OTP request found for this email");
+      return res.status(400).json({ error: "No OTP request found for this email" });
     }
     if (storedUser.otp !== otp) {
-      throw new ApiError(400, "Invalid OTP");
+      return res.status(400).json({ error: "Invalid OTP" });
     }
-    const { name, password } = storedUser;
+
+    const { fullname, password, phone,username } = storedUser;
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, phoneno, password: hashedPassword });
+    const newUser = await User.create({ username,fullname, email, phone, password: hashedPassword });
+console.log("user create hogya",newUser);
 
-    await newUser.save();
-    delete tempUserStore[email];
+if (!newUser.phone) {
+  return res.status(400).json({ error: "Phone number is required" });
+}
 
+    // await newUser.save();
     const token = generateToken(newUser._id);
 
-    console.log("aya token",token);
+    console.log("token aaya",token);
+    
+    delete tempUserStore[email];
 
-    const createdUser = await User.findById(newUser._id).select("-password ");
+    // Save refreshToken to the database
+    newUser.token = token;
+    await newUser.save({ validateBeforeSave: false });
+console.log("new user after token save",newUser);
 
-    if (!createdUser) {
-      throw new ApiError(500, "Something went wrong while registering the user");
-    }
     const options = {
       httpOnly: true,
       secure: true,
-    }
+    };
 
     res
       .status(201)
       .cookie("token", token, options)
       .json({
-        message: 'OTP verified successfully',
+        message: "OTP verified successfully",
         user: {
           token,
-          createdUser
-         },
+          user: newUser,
+        },
       });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -123,7 +138,24 @@ const login = async (req, res) => {
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
     const token = generateToken(user._id);
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    // const refreshToken = generateRefreshToken(user._id);
+
+    // Save refreshToken to the database
+    user.token = token;
+    await user.save();
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    res
+      .status(200)
+      .cookie("token", token, options)
+      .json({
+        token,
+        user: { id: user._id, fullname: user.fullname, email: user.email },
+      });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
