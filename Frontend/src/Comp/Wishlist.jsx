@@ -32,7 +32,7 @@ const navigate= useNavigate()
                             </div>
                             <div className="flex justify-between">
                                 <p className="text-gray-700"> Size :
-                                    {item.size.map((size, index) => (
+                                    {item?.size?.map((size, index) => (
                                         <span key={index}> {size} </span>
                                     ))}</p>
 
@@ -52,7 +52,7 @@ const navigate= useNavigate()
                                 View Product
                             </button> */}
                             <button
-                                onClick={() =>navigate(`/placedOrder/:${item.id}`,{state:item})}
+                                onClick={() =>navigate(`/placedOrder/:${item.id}`)}
                                 className="mt-2 justify-end bg-green-500 text-white px-3 py-1 rounded"
                             >
                                 Add To Cart

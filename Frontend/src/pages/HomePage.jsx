@@ -2,8 +2,14 @@ import { ShoppingCart, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import Card from "../Comp/Card";
 import ProductCrousel from "../Comp/ProductCrousel";
-import Categories from "../Comp/Categories";
+import AllCategories from "../Comp/AllCategories";
+import { useEffect } from "react";
+import { useSelector,useDispatch } from "react-redux";
+import { fetchProducts } from "../store/productsSlicer";
+import SubCat from "../Comp/user/SubCat";
 function HomePage() {
+
+
   const product = [
     {
       id: 1,
@@ -136,13 +142,23 @@ function HomePage() {
       image: "https://as1.ftcdn.net/v2/jpg/02/34/93/61/1000_F_234936136_BpfUOqp4KDjDtV8oKNjHjN9nAyv7EtMw.jpg"
     }
   ];
-  
 
-  
+  const dispatch = useDispatch();
+  const { items, status } = useSelector((state) => state.products); // ✅ Correct path
+
+  useEffect(() => {
+    
+    if (status === "idle") {
+      dispatch(fetchProducts());
+    }
+  }, [dispatch, status]);
+
+
+
   return (
     <div className="min-h-screen w-full bg-gray-100">
       {/* Hero Section */}
-      <ProductCrousel/>
+      <ProductCrousel />
       <section className="bg-white py-16  text-center">
         <h1 className="text-4xl font-bold text-gray-800">
           Discover Amazing Products!
@@ -157,7 +173,8 @@ function HomePage() {
           Shop Now <ShoppingCart className="ml-2" />
         </Link>
       </section>
-<Categories/>
+      {/* <SubCat/> */}
+      <AllCategories />
 
       {/* Featured Products */}
       <section className="w-max mx-auto py-12 ">
@@ -165,10 +182,7 @@ function HomePage() {
           Featured Products
         </h2>
         <div className=" mt-6 overflow-hidden">
-          {/* Sample Product */}
-        <Card allproduct={product}/>
-
-          {/* Repeat more products as needed */}
+          <Card allproduct={product} />
         </div>
       </section>
 

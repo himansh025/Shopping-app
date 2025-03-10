@@ -32,14 +32,6 @@ function Navbar() {
             {/* <img src={logo} alt="Logo" className="h-12 w-12 mr-2" /> */}
             <span className="text-xl text-decoration-none ml-5 font-bold text-gray-800">ShopEase</span>
           </Link>
-
-          {/* Desktop Menu */}
-          <div className="hidden md:flex  gap-20 space-x-6">
-            <NavLink to="/" text="Home" />
-            <NavLink to="/shop" text="Shop" />
-            <NavLink to="/cart" text="Cart" icon={<ShoppingCart className="h-5 w-5" />} />
-            {/* <SearchBar/> */}
-          </div>
           <SearchBar/>
 
           {/* Auth Section */}
@@ -85,6 +77,11 @@ function Navbar() {
           </button>
         </div>
       </div>
+         {/* <div className="hidden md:flex  gap-20 space-x-6">
+            <NavLink to="/" text="Home" />
+            <NavLink to="/shop" text="Shop" />
+            <NavLink to="/cart" text="Cart" icon={<ShoppingCart className="h-5 w-5" />} />
+          </div> */}
 
       {/* Mobile Menu */}
       {menuOpen && (
