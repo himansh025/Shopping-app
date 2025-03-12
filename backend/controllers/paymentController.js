@@ -5,58 +5,63 @@ const Product = require("../models/ProductModel");
 const crypto = require("crypto");
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
+  key_id: process.env.RAZORPAY_KEY_ID || rzp_test_0QxwTt83YVaeeL,
+  key_secret: process.env.RAZORPAY_KEY_SECRET || CkY6Xwi4gDa1vxeUV0TipTRr,
 });
 
 
 const createOrder = async (req, res) => {
   try {
-    const { data, productDetails } = req.body;
+    const { values, productDetails } = req.body;
+    console.log(values, productDetails);
 
     // Validate input
-    if (!data || !productDetails) {
+    if (!values || !productDetails) {
       return res.status(400).json({
         success: false,
         message: "Invalid order data"
       });
     }
 
-    // Cash on Delivery (COD) Order
-    if (data.paymentMethod === "COD") {
-      for (const product of productDetails) {
-        const productDoc = await Product.findById(product.productId);
-        if (!productDoc || productDoc.stock < product.quantity) {
-          return res.status(400).json({
-            success: false,
-            message: `Insufficient stock for product: ${product.name}`
-          });
-        }
+     // Generate a unique orderId for both COD and Online payments
+     const uniqueOrderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
-        // Reduce stock
-        productDoc.stock -= product.quantity;
-        await productDoc.save();
+    // Cash on Delivery (COD) Order
+    if (values.paymentMethod === "COD") {
+      const product = productDetails
+      // console.log("f", product.id);
+      const productDoc = await Product.findById(product.id);
+      if (!productDoc || productDoc.stock < product.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock for product: ${product.name}`
+        });
       }
+      // Reduce stock
+      productDoc.stock -= product.quantity;
+      await productDoc.save();
+
 
       // Create COD Order
       const order = new Order({
-        userId: data.userId, // Ensure this is a valid ObjectId
-        products: productDetails.map(product => ({
-          productId: product.productId,
+        userId: values.userId || "67c9a7a9e24544a4e93f8ace", // Ensure this is a valid ObjectId
+        products: {
+          productId: productDetails.id,
           quantity: product.quantity,
           price: product.price
-        })),
-        totalAmount: productDetails.reduce((total, product) => total + product.price * product.quantity, 0),
-        name: data.name,
-        email: data.email,
-        phone: data.contact,
-        address: data.address,
-        city: data.city,
-        state: data.state,
-        zip: data.zip,
-        landmark: data.landmark,
+        },
+        totalAmount: product.price * product.quantity,
+        name: values.name || "null",
+        email: values.email,
+        phone: values.contact || "344433333",
+        address: values.address,
+        city: values.city,
+        state: values.state,
+        zip: values.zip,
+        landmark: values.landmark,
         paymentMethod: "COD",
-        status: "Pending"
+        status: "Pending",
+        orderDetails: { orderId: uniqueOrderId }
       });
 
       await order.save();
@@ -69,25 +74,44 @@ const createOrder = async (req, res) => {
     }
 
     // Online Payment Order
-    if (data.paymentMethod === "Online") {
+    if (values.paymentMethod === "Online") {
       // Calculate total amount
-      const totalAmount = productDetails.reduce((total, product) =>
-        total + (product.price * product.quantity), 0
-      );
+      const totalAmount = productDetails.price * productDetails.quantity;
 
       // Razorpay order options
       const options = {
         amount: Math.round(totalAmount * 100), // Convert to paise
         currency: "INR",
-        receipt: `order_rcptid_${Date.now()}`,
+        receipt: uniqueOrderId, // Use generated orderId
         notes: {
-          userId: data.userId,
+          userId: values.userId,
           products: JSON.stringify(productDetails)
         }
       };
 
+      
+      
       // Create Razorpay order
       const razorpayOrder = await razorpay.orders.create(options);
+      console.log("razer", razorpayOrder);
+      
+      const order = new Order({
+        userId: values.userId || "67c9a7a9e24544a4e93f8ace",
+        products: [{ productId: productDetails.id, quantity: productDetails.quantity, price: productDetails.price }],
+        totalAmount: productDetails.price * productDetails.quantity,
+        name: values.name || "null",
+        email: values.email,
+        phone: values.contact || "344433333",
+        address: values.address,
+        city: values.city,
+        state: values.state,
+        zip: values.zip,
+        landmark: values.landmark,
+        paymentMethod: "Online",
+        status: "Processing",
+        orderDetails: { orderId: razorpayOrder.id } // Store generated orderId
+      });
+      await order.save();
 
       res.status(200).json({
         success: true,
@@ -98,9 +122,9 @@ const createOrder = async (req, res) => {
           key: process.env.RAZORPAY_KEY_ID
         },
         orderDetails: {
-          name: data.name,
-          email: data.email,
-          contact: data.contact
+          name: values.name,
+          email: values.email,
+          contact: values.contact
         }
       });
     }
@@ -117,28 +141,37 @@ const createOrder = async (req, res) => {
 const verifyPayment = async (req, res) => {
   try {
     const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature
+      order_id,
+      payment_id,
+      signature
     } = req.body;
+
+    if (!order_id || !payment_id || !signature) {
+      return res.status(400).json({ success: false, message: "Invalid payment verification data" });
+    }
+
 
     // Verify signature
     const generatedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET )
+      .update(order_id + "|" + payment_id)
       .digest("hex");
 
-    if (generatedSignature !== razorpay_signature) {
+    console.log("sig", generatedSignature);
+
+    if (generatedSignature !== signature) {
       return res.status(400).json({
         success: false,
         message: "Payment verification failed"
       });
     }
+console.log("order id",order_id);
 
-    // Find and update order
-    const order = await Order.findOne({
-      "razorpay.orderId": razorpay_order_id
-    });
+
+  // Find and update order
+  const order = await Order.findOne({ "orderDetails.orderId": order_id });
+    console.log(order);
+
 
     if (!order) {
       return res.status(404).json({
@@ -149,16 +182,27 @@ const verifyPayment = async (req, res) => {
 
     // Update order status and payment details
     order.status = "Paid";
-    order.razorpay = {
-      paymentId: razorpay_payment_id,
-      signature: razorpay_signature
-    };
+    order.orderDetails.paymentId = payment_id;
+    order.orderDetails.signature = signature;
 
     // Reduce product stock
+    if(order.products.length>1){
     for (const item of order.products) {
       const product = await Product.findById(item.productId);
       if (product) {
         product.stock -= item.quantity;
+        await product.save();
+      }
+    }}else{
+      const prodcount= order.products[0];
+      
+      console.log("single product",prodcount);
+
+      const product = await Product.findById(prodcount.productId);
+      console.log("product found",product);
+
+      if (product) {
+        product.stock -= prodcount.quantity;
         await product.save();
       }
     }
