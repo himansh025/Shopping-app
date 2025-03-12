@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { data, useNavigate, useParams } from "react-router-dom";
+import {  useNavigate, useParams } from "react-router-dom";
 import { CiHeart } from "react-icons/ci";
 import { IoHeart } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
