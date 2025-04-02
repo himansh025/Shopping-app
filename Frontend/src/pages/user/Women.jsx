@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../../store/productsSlicer.js";
+import { useNavigate } from "react-router-dom";
 
 const Women = () => {
   const dispatch = useDispatch();
   const { items, status } = useSelector((state) => state.products);
-
+const navigate= useNavigate()
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchProducts());
@@ -39,7 +40,10 @@ const Women = () => {
               </div>
               <div className="p-4">
                 <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-                <button className="w-full bg-pink-500 text-white py-2 rounded hover:bg-pink-600 transition duration-300">
+                <button 
+                                                  onClick={() => navigate(`/addToCart/${product._id}`)}
+
+                className="w-full bg-pink-500 text-white py-2 rounded hover:bg-pink-600 transition duration-300">
                   Shop Now
                 </button>
               </div>
@@ -49,7 +53,7 @@ const Women = () => {
       )}
 
       {/* Featured Products Section */}
-      <div className="mb-8">
+      {/* <div className="mb-8">
         <h2 className="text-2xl font-bold mb-4">Featured Products</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((item) => (
@@ -66,7 +70,8 @@ const Women = () => {
                 <p className="text-gray-600 text-sm mb-2">High-quality fashion item</p>
                 <div className="flex justify-between items-center">
                   <span className="font-bold">$49.99</span>
-                  <button className="bg-pink-500 text-white px-3 py-1 rounded text-sm hover:bg-pink-600">
+                  <button 
+                                  className="bg-pink-500 text-white px-3 py-1 rounded text-sm hover:bg-pink-600">
                     Add to Cart
                   </button>
                 </div>
@@ -74,7 +79,7 @@ const Women = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
     </div>
   );

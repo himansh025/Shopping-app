@@ -11,16 +11,25 @@ function AllCategories() {
       name: "Women's",
     },
     {
-      img: "https://imgs.search.brave.com/vxicPzgQPcBFEOV-KIHunPyN5DgEWb5eVc4uGwTqd-I/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by9m/dWxsLXNob3QtYm95/cy13aXRoLXN1bmds/YXNzZXMtcG9zaW5n/XzIzLTIxNDg0MjMx/MzYuanBnP3NlbXQ9/YWlzX2h5YnJpZA",
-      name: "Boy's",
+      img: "https://images.pexels.com/photos/682933/pexels-photo-682933.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      name: "Electronics",
     },
-    {
-      img: "https://imgs.search.brave.com/aZJsp8d0aIfNNv1aza-SAnaCWy9JI-LJZC6vIEtnYEQ/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by9j/dXRlLWxpdHRsZS1n/aXJsLXdpdGgtc2hv/cHBpbmctYmFncy15/ZWxsb3ctYmFja2dy/b3VuZF8xMTU3LTI3/ODQwLmpwZz9zZW10/PWFpc19oeWJyaWQ",
-      name: "Girl's",
-    },
+
+    // {
+    //   img: "https://imgs.search.brave.com/vxicPzgQPcBFEOV-KIHunPyN5DgEWb5eVc4uGwTqd-I/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by9m/dWxsLXNob3QtYm95/cy13aXRoLXN1bmds/YXNzZXMtcG9zaW5n/XzIzLTIxNDg0MjMx/MzYuanBnP3NlbXQ9/YWlzX2h5YnJpZA",
+    //   name: "Boy's",
+    // },
+    // {
+    //   img: "https://imgs.search.brave.com/aZJsp8d0aIfNNv1aza-SAnaCWy9JI-LJZC6vIEtnYEQ/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by9j/dXRlLWxpdHRsZS1n/aXJsLXdpdGgtc2hv/cHBpbmctYmFncy15/ZWxsb3ctYmFja2dy/b3VuZF8xMTU3LTI3/ODQwLmpwZz9zZW10/PWFpc19oeWJyaWQ",
+    //   name: "Girl's",
+    // },
+
+    
   ];
 
-  let cats = ["men", "women", "boy", "girl"]
+  let cats = ["men", "women","electronics"
+    // ,"boy", "girl"
+  ]
 
   return (
     <div className="w-full mx-auto h-max bg-gray-100 py-10">

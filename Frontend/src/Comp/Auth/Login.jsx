@@ -3,44 +3,69 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
-
+import {login} from '../../store/authSlicer.js'
+import { useSelector,useDispatch } from "react-redux";
+import { ToastContext } from "../../App.jsx";
+import { useContext } from "react";
 const Login = () => {
   const { register, handleSubmit, formState: { errors, dirtyFields } } = useForm();
+  const { success, error, info, warning } = useContext(ToastContext);
   const navigate = useNavigate();
   const location = useLocation();
   const { role } = location.state || { role: "user" };
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const user= useSelector((state)=>state.auth);
+const dispatch= useDispatch();
 
-  const handleLogin = async (data) => {
-    setIsLoading(true);
-    try {
-      console.log("Login Data:", data);
-      let res;
-      if (role === "user") {
-        res = await axios.post("http://localhost:5000/api/v1/user/login", data, {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        });
-      } else {
-        res = await axios.post("http://localhost:5000/api/v1/seller/login", data, {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        });
-      }
-      
-      console.log(res);
-      // Handle successful login (redirect, set auth state, etc.)
-      
-    } catch (error) {
-      console.error("Login failed:", error);
-      // Handle login error
-    } finally {
-      setIsLoading(false);
+console.log("user",user)
+const handleLogin = async (data) => {
+  setIsLoading(true);
+  try {
+    console.log("Login Data:", data);
+    let res;
+    
+    if (role === "user") {
+      res = await axios.post("http://localhost:5000/api/v1/user/login", data, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+    } else {
+      res = await axios.post("http://localhost:5000/api/v1/seller/login", data, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
     }
-  };
+    
+    if (res && res.data) {
+      success('Login successful!');
+      console.log(res.data);
+      
+      const token = res.data.token;
+      const userData = res.data.user;
+      
+      // Store token in localStorage
+      localStorage.setItem("token", token);
+      
+      // Convert user object to JSON string before storing
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      console.log("User data being dispatched:", userData);
+      
+      // Dispatch login action with the correct payload structure
+      dispatch(login({ user: userData }));
+      navigate("/")
+    }
+  } catch (error) {
+    console.error("Login failed:", error);
+    error("invalid credentials")
+    error('Login failed. Please check your credentials.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">

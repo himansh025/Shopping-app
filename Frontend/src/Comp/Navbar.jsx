@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/authSlicer.js";
 import SearchBar from "./SearchBar.jsx";
 import { FaUser } from "react-icons/fa6";
+// import NavLinks from "./NavLinks.jsx";
 // import logo from "../logo.png"; // Your logo image
 
 function Navbar() {
@@ -38,7 +39,7 @@ function Navbar() {
           <div className="hidden md:flex space-x-4 items-center">
             {user ? (
               <>
-                <NavLink to="/profile" text="Profile" icon={<User className="h-5 w-5" />} />
+                {/* <NavLink to="/profile" text="Profile" icon={<User className="h-5 w-5" />} /> */}
                 <button onClick={handleLogout} className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600">
                   <LogOut className="h-5 w-5 inline" /> Logout
                 </button>
@@ -77,19 +78,11 @@ function Navbar() {
           </button>
         </div>
       </div>
-         {/* <div className="hidden md:flex  gap-20 space-x-6">
-            <NavLink to="/" text="Home" />
-            <NavLink to="/shop" text="Shop" />
-            <NavLink to="/cart" text="Cart" icon={<ShoppingCart className="h-5 w-5" />} />
-          </div> */}
+     
 
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-gray-100 p-3 space-y-2">
-          <MobileNavLink to="/" text="Home" onClick={() => setMenuOpen(false)} />
-          <MobileNavLink to="/shop" text="Shop" onClick={() => setMenuOpen(false)} />
-          <MobileNavLink to="/cart" text="Cart" onClick={() => setMenuOpen(false)} />
-          
           {user ? (
             <>
               <MobileNavLink to="/profile" text="Profile" onClick={() => setMenuOpen(false)} />
@@ -116,26 +109,6 @@ function Navbar() {
   );
 }
 
-// Desktop NavLink Component
-function NavLink({ to, text, icon }) {
-  return (
-    <Link to={to} className="flex text-decoration-none items-center text-gray-700 hover:text-gray-900">
-      {icon && <span className="mr-1">{icon}</span>}
-      {text}
-    </Link>
-  );
-}
 
-// Mobile NavLink Component
-function MobileNavLink({ to, text, onClick }) {
-  return (
-    <>
-    <Link to={to} className="block text-decoration-none text-gray-700 hover:text-blue-600 px-4 py-1" onClick={onClick}>
-      {text}
-    </Link>
-       
-        </>
-  );
-}
 
 export default Navbar;

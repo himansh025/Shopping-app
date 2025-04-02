@@ -4,15 +4,14 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-// import { useLocation } from "react-router-dom";
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
 const RAZORPAY_ID = import.meta.env.VITE_RAZORPAY_ID;
 
 console.log(RAZORPAY_KEY,RAZORPAY_ID);
 
 const PlaceOrder = () => {
-    // const [orderId, setOrderId] = useState(null);
-    const [quantity,setquantity]= useState(1);
+    const [isLoading, setIsLoading] = useState(false);
+    const [quantity, setQuantity] = useState(1);
     const [ProductDetail, setProductDetail] = useState("");
     const {items}= useSelector((state)=>state.products)
     const {id} = useParams()
@@ -53,6 +52,8 @@ const PlaceOrder = () => {
 
     const handleSubmit = async (values, { resetForm }) => {
         console.log("Order Place:", values);
+        setIsLoading(true);
+    
        
   let data= {
           name: ProductDetail.name,
@@ -71,11 +72,12 @@ const PlaceOrder = () => {
                     price: ProductDetail.price,
                     quantity: quantity
                 }
-
-            }, {
+                
+              }, {
                 headers: { "Content-Type": "application/json" }
-            });
-            console.log(response);
+              });
+              console.log(response);
+              setIsLoading(false);
 
             console.log("Order Placed:", response.data);
                 // (response.data.orderId);
@@ -89,6 +91,7 @@ const PlaceOrder = () => {
             }
         }
         catch (error) {
+            setIsLoading(false);
             console.error("Error placing order:", error);
             alert("Failed to place order.");
         }
@@ -142,114 +145,278 @@ const PlaceOrder = () => {
         const rzp = new window.Razorpay(options);
         rzp.open();
     };
-    
+    const totalPrice = ProductDetail.price * quantity;
 
     return (
-        <div className="w-full flex flex-col lg:flex-row justify-center items-center gap-6 p-6 bg-gray-100">
-        {/* First Container */}
-        <div className="lg:w-1/3 w-full max-w-sm rounded-lg mx-auto bg-blue-300 p-4 flex justify-center items-center">
-          <img src={ProductDetail.images} alt="Product" className="h-80 w-80 md:h-90 md:w-90 object-cover rounded-lg" />
+      <div className=" w-full flex flex-col lg:flex-row justify-center items-start gap-8 p-6 bg-gray-50">
+      {/* Product Image Container */}
+      <div className=" lg:w-1/3 hidden md:flex w-full  sticky  top-6">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="relative">
+            <img 
+              src={ProductDetail.images || "/api/placeholder/400/400"} 
+              alt={ProductDetail.name} 
+              className="w-full h-96 object-cover" 
+            />
+            {ProductDetail.discount > 0 && (
+              <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                {ProductDetail.discount}% OFF
+              </div>
+            )}
+          </div>
+          
+          <div className="p-6">
+            <h2 className="text-2xl font-bold text-gray-800">{ProductDetail.name}</h2>
+            <div className="flex items-center mt-2">
+              <div className="flex text-yellow-400">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="ml-2 text-gray-600">(120 reviews)</span>
+            </div>
+            <div className="mt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-3xl font-bold text-gray-900">₹{ProductDetail.price}</span>
+                {ProductDetail.originalPrice && (
+                  <span className="text-gray-500 line-through">₹{ProductDetail.originalPrice}</span>
+                )}
+              </div>
+              <p className="mt-2 text-sm text-gray-500">
+                {ProductDetail.availability ? 'In Stock' : 'Out of Stock'}
+              </p>
+            </div>
+            
+            <div className="mt-4 border-t pt-4">
+              <p className="text-gray-700">{ProductDetail.description}</p>
+            </div>
+          </div>
         </div>
+      </div>
       
-        {/* Second Container */}
-        <div className="lg:w-1/2 w-full max-w-lg mx-auto bg-neutral-300 p-6 shadow-lg rounded-lg text-center">
-          <h2 className="text-2xl font-bold mb-4">Place Your Order</h2>
+      {/* Order Form Container */}
+      <div className="lg:w-1/2 w-full">
+        <div className="bg-white p-8 shadow-md rounded-xl">
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">Complete Your Order</h2>
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-            <Form className="space-y-4">
-              <div className="flex flex-wrap justify-between">
-                <p className="text-black">Product ID: {ProductDetail._id}</p>
-                <p className="text-black">Product Name: {ProductDetail.name}</p>
-              </div>
-      
-              {/* Name and Email */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-700">Full Name</label>
-                  <Field type="text" name="name" className="w-full border p-2 rounded-md" placeholder="Enter your name" />
-                  <ErrorMessage name="name" component="p" className="text-red-500" />
+            {({ isSubmitting }) => (
+              <Form>
+                <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm font-medium text-gray-600">Product ID: <span className="font-mono">{ProductDetail._id}</span></p>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-gray-700">Email</label>
-                  <Field type="email" name="email" className="w-full border p-2 rounded-md" placeholder="Enter your email" />
-                  <ErrorMessage name="email" component="p" className="text-red-500" />
+                
+                <div className="space-y-6">
+                  {/* Personal Information */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 text-gray-700">Personal Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <Field 
+                          type="text" 
+                          name="name" 
+                          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                          placeholder="John Doe" 
+                        />
+                        <ErrorMessage name="name" component="p" className="mt-1 text-sm text-red-600" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <Field 
+                          type="email" 
+                          name="email" 
+                          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                          placeholder="johndoe@example.com" 
+                        />
+                        <ErrorMessage name="email" component="p" className="mt-1 text-sm text-red-600" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        <Field 
+                          type="tel" 
+                          name="phone" 
+                          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                          placeholder="+91 9876543210" 
+                        />
+                        <ErrorMessage name="phone" component="p" className="mt-1 text-sm text-red-600" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Shipping Address */}
+                  <div className="pt-4 border-t">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-700">Shipping Address</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <Field 
+                          as="textarea" 
+                          name="address" 
+                          rows="2" 
+                          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                          placeholder="123 Main Street, Apartment 4B" 
+                        />
+                        <ErrorMessage name="address" component="p" className="mt-1 text-sm text-red-600" />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                          <Field 
+                            type="text" 
+                            name="city" 
+                            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                            placeholder="Mumbai" 
+                          />
+                          <ErrorMessage name="city" component="p" className="mt-1 text-sm text-red-600" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                          <Field 
+                            type="text" 
+                            name="state" 
+                            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                            placeholder="Maharashtra" 
+                          />
+                          <ErrorMessage name="state" component="p" className="mt-1 text-sm text-red-600" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Landmark (Optional)</label>
+                          <Field 
+                            type="text" 
+                            name="landmark" 
+                            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                            placeholder="Near Central Park" 
+                          />
+                          <ErrorMessage name="landmark" component="p" className="mt-1 text-sm text-red-600" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                          <Field 
+                            type="text" 
+                            name="zip" 
+                            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                            placeholder="400001" 
+                          />
+                          <ErrorMessage name="zip" component="p" className="mt-1 text-sm text-red-600" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Order Summary */}
+                  <div className="pt-4 border-t">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-700">Order Summary</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="text-gray-600">Product</span>
+                        <span className="font-medium">{ProductDetail.name}</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center ">
+                          <span className="text-gray-600 mr-4">Quantity</span>
+                          <div className="flex items-center border rounded-lg overflow-hidden">
+                            <button 
+                              type="button"
+                              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                              className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600"
+                            >
+                              −
+                            </button>
+                            <span className="px-2 py-1 text-center w-8">{quantity}</span>
+                            <button 
+                              type="button"
+                              onClick={() => setQuantity(Math.min(10, quantity + 1))}
+                              className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                        <div className="overflow-hidden" >₹{ProductDetail.price} × {quantity}
+                        </div>
+                      </div>
+                      
+                      <div className="border-t pt-4 mt-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">Subtotal</span>
+                          <span className="font-medium">₹{totalPrice}</span>
+                        </div>
+                        <div className="flex justify-between items-center mt-2">
+                          <span className="text-gray-600">Shipping</span>
+                          <span className="text-gray-600">₹{totalPrice > 500 ? 0 : 50}</span>
+                        </div>
+                        <div className="flex justify-between items-center mt-2 font-bold text-lg">
+                          <span>Total</span>
+                          <span>₹{totalPrice > 500 ? totalPrice : totalPrice + 50}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Payment Method */}
+                  <div className="pt-4 border-t">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-700">Payment Method</h3>
+                    <div className="space-y-3">
+                      <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                        <Field 
+                          type="radio" 
+                          name="paymentMethod" 
+                          value="COD" 
+                          className="h-5 w-5 text-blue-600" 
+                        />
+                        <span className="ml-3">
+                          <span className="block font-medium text-gray-700">Cash on Delivery</span>
+                          <span className="block text-sm text-gray-500">Pay when you receive the product</span>
+                        </span>
+                      </label>
+                      
+                      <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                        <Field 
+                          type="radio" 
+                          name="paymentMethod" 
+                          value="Online" 
+                          className="h-5 w-5 text-blue-600" 
+                        />
+                        <span className="ml-3">
+                          <span className="block font-medium text-gray-700">Online Payment</span>
+                          <span className="block text-sm text-gray-500">Pay now using Credit/Debit Card, UPI, Netbanking</span>
+                        </span>
+                      </label>
+                    </div>
+                    <ErrorMessage name="paymentMethod" component="p" className="mt-1 text-sm text-red-600" />
+                  </div>
                 </div>
-              </div>
-      
-              {/* Phone & Address */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-700">Phone Number</label>
-                  <Field type="tel" name="phone" className="w-full border p-2 rounded-md" placeholder="Enter your phone number" />
-                  <ErrorMessage name="phone" component="p" className="text-red-500" />
+                
+                {/* Submit Button */}
+                <div className="mt-8">
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting || isLoading}
+                    className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${(isSubmitting || isLoading) ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  >
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing...
+                      </>
+                    ) : 'Place Order'}
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-gray-700">Address</label>
-                  <Field as="textarea" name="address" className="w-full border p-2 rounded-md" placeholder="Enter your address" />
-                  <ErrorMessage name="address" component="p" className="text-red-500" />
-                </div>
-              </div>
-      
-              {/* City & State */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-700">City</label>
-                  <Field type="text" name="city" className="w-full border p-2 rounded-md" placeholder="Enter city" />
-                  <ErrorMessage name="city" component="p" className="text-red-500" />
-                </div>
-                <div>
-                  <label className="block text-gray-700">State</label>
-                  <Field type="text" name="state" className="w-full border p-2 rounded-md" placeholder="Enter state" />
-                  <ErrorMessage name="state" component="p" className="text-red-500" />
-                </div>
-              </div>
-      
-              {/* Landmark & ZIP Code */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-700">Landmark</label>
-                  <Field type="text" name="landmark" className="w-full border p-2 rounded-md" placeholder="Enter Landmark" />
-                  <ErrorMessage name="landmark" component="p" className="text-red-500" />
-                </div>
-                <div>
-                  <label className="block text-gray-700">ZIP Code</label>
-                  <Field type="number" name="zip" className="w-full border p-2 rounded-md" placeholder="Enter ZIP code" />
-                  <ErrorMessage name="zip" component="p" className="text-red-500" />
-                </div>
-              </div>
-      
-              {/* Payment Method */}
-              <div>
-                <p className="text-lg font-bold">Amount: ₹ {ProductDetail.price}</p>
-                <div className="flex items-center gap-2">
-    <p className="text-lg font-bold">Quantity:</p>
-    <select 
-    onChange={(e) => setquantity(e.target.value)} 
-    className="border-2 border-gray-600 rounded-md p-2 text-lg"
->
-    <option value="" className="font-bold">Select Quantity</option>
-    {[...Array(10).keys()].map((num) => (
-        <option key={num + 1} value={num + 1} className="font-bold">{num + 1}</option>
-    ))}
-</select>
-
-</div>
-
-                <label className="block text-gray-700">Payment Method</label>
-                <Field as="select" name="paymentMethod" className="w-full border p-2 rounded-md">
-                  <option value="COD">Cash on Delivery</option>
-                  <option value="Online">Online Payment</option>
-                </Field>
-                <ErrorMessage name="paymentMethod" component="p" className="text-red-500" />
-              </div>
-      
-              {/* Submit Button */}
-              <button type="submit" className="mt-4 bg-green-600 text-white px-6 py-3 text-lg rounded-md w-full hover:bg-green-700">
-                Place Order
-              </button>
-            </Form>
+              </Form>
+            )}
           </Formik>
         </div>
       </div>
+    </div>
       
     
     

@@ -3,14 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from '../../store/productsSlicer.js';
 import { useNavigate } from "react-router-dom";
 
-const Men = () => {
+const Electronics = () => {
   const dispatch = useDispatch();
   const { items, status } = useSelector((state) => state.products); // ✅ Correct path
 const navigate= useNavigate();
   console.log(items);
-  // localStorage.clear();
-  // window.location.reload();
-  
+
 
   useEffect(() => {
     
@@ -19,14 +17,14 @@ const navigate= useNavigate();
     }
   }, [dispatch, status]);
 
-  const menProducts = items?.filter((p) => p.attributes.type === "Men");
+  const menProducts = items?.filter((p) => p.attributes.type === "Gadget");
 
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Men's Collection</h1>
+      <h1 className="text-3xl font-bold mb-4">Electronics Gadget Collection</h1>
       <p className="text-gray-600 mb-6">
-        Discover the latest trends in men's fashion
+        Discover the latest trends in Electronics Gadget
       </p>
 
       {menProducts.length === 0 ? (
@@ -51,9 +49,7 @@ const navigate= useNavigate();
                 <p className="text-sm text-gray-600">
                   Brand: {product.brand} | Material: {product.material}
                 </p>
-                <p className="text-sm text-gray-600">
-                  Sizes: {product.size?.join(", ")}
-                </p>
+              
                 <p className="text-sm text-gray-600">
                   Seller: {product.seller?.name} ({product.seller?.contact})
                 </p>
@@ -71,4 +67,4 @@ const navigate= useNavigate();
   );
 };
 
-export default Men;
+export default Electronics;

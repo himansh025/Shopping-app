@@ -3,18 +3,23 @@ import { Carousel } from "react-bootstrap"; // Ensure Bootstrap is installed
 function ProductCarousel() {
   const products = [
     {
-      img: "https://as1.ftcdn.net/v2/jpg/01/30/75/06/1000_F_130750621_HUuWtyrRgJHgk55v1IOIvgOdLduj1fob.jpg",
-      name: "Product 1",
+      img: "https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      name: "Men's Cloths",
       des: "High-quality product with amazing features",
     },
     {
-      img: "https://as2.ftcdn.net/v2/jpg/02/18/95/39/1000_F_218953981_WZqXxFUXvcFwHnQKyOnMshJLUJH3wvdH.jpg",
-      name: "Product 2",
+      img: "https://images.pexels.com/photos/297933/pexels-photo-297933.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      name: "Shirts",
       des: "High-quality product with amazing features",
     },
     {
-      img: "https://as2.ftcdn.net/v2/jpg/02/18/95/39/1000_F_218953981_WZqXxFUXvcFwHnQKyOnMshJLUJH3wvdH.jpg",
-      name: "Product 3",
+      img: "https://images.pexels.com/photos/16170/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      name: "Jackets",
+      des: "High-quality product with amazing features",
+    },
+    {
+      img: "https://images.pexels.com/photos/13758357/pexels-photo-13758357.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      name: "Women",
       des: "High-quality product with amazing features",
     },
   ];
