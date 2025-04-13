@@ -1,20 +1,18 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "../../store/productsSlicer.js";
+// import { fetchProducts } from "../../store/productsSlicer.js";
 import { useNavigate } from "react-router-dom";
 
 const Women = () => {
   const dispatch = useDispatch();
-  const { items, status } = useSelector((state) => state.products);
+  const { items } = useSelector((state) => state.products);
 const navigate= useNavigate()
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchProducts());
-    }
-  }, [dispatch, status]);
+  }, [items]);
 
   // Filter women's products
   const womenProducts = items?.filter((p) => p.attributes.type === "Women") || [];
+  console.log(womenProducts)
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">

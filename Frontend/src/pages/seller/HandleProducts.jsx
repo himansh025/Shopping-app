@@ -1,18 +1,25 @@
+import axios from "axios";
 import { useState, useEffect } from "react";
+import AddProducts from "../../Comp/seller/AddProducts";
+import EditProducts from "../../Comp/seller/EditProducts";
 
 const HandleProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [addproduct, setaddproduct] = useState(false);
+  const [editproduct, seteditproduct] = useState(false);
+const [selectedProduct,setselectedProduct]= useState([])
   useEffect(() => {
     fetchProducts();
   }, []);
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("https://api.example.com/seller-products"); // Replace with actual API
-      const data = await response.json();
-      setProducts(data);
+      const response = await axios.get("http://localhost:5000/api/v1/products/all"); // Replace with actual API
+      const data = await response.data;
+      console.log(data);
+
+      setProducts(data?.products);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -22,21 +29,31 @@ const HandleProducts = () => {
 
   const handleDelete = async (productId) => {
     try {
-      await fetch(`https://api.example.com/products/${productId}`, { method: "DELETE" });
-      setProducts(products.filter((product) => product.id !== productId));
+      const response = await axios.delete("http://localhost:5000/api/v1/products/delete",productId);
+
+      setProducts(products.filter((product) => product._id !== productId));
     } catch (error) {
       console.error("Error deleting product:", error);
     }
   };
 
+  useEffect(() => {
+    document.body.style.overflow = addproduct ? "hidden" : "auto";
+    return () => (document.body.style.overflow = "auto");
+  }, [addproduct]);
+
+
   const handleEdit = (productId) => {
     console.log("Edit product:", productId);
-    // Navigate to edit page or open a modal (implementation needed)
+    const editproduct = products.find((product) => product._id !== productId)
+    console.log(editproduct ? editproduct : "");
+    setselectedProduct(editproduct)
+    seteditproduct(true)
   };
 
   const handleAddProduct = () => {
     console.log("Add new product");
-    // Navigate to add product page (implementation needed)
+    setaddproduct(true)
   };
 
   if (loading) {
@@ -45,7 +62,26 @@ const HandleProducts = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-4">Your Products</h2>
+      <h2 className="text-2xl font-semibold mb-4">Your Products ({products.length})</h2>
+      {addproduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10 backdrop-blur-sm">
+          <div className="bg-white  max-h-[90vh] w-[90%] md:w-max overflow-y-auto rounded-lg  p-4">
+            <AddProducts onClose={() => setaddproduct(false)} />
+          </div>
+        </div>
+      )}
+
+      {editproduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10 backdrop-blur-sm">
+          <div className="bg-white  max-h-[90vh] w-[90%] md:w-max overflow-y-auto rounded-lg  p-4">
+            <EditProducts
+              product={selectedProduct} 
+              onClose={() => seteditproduct(false)}
+            />
+          </div>
+        </div>
+      )}
+
 
       <button onClick={handleAddProduct} className="mb-4 px-4 py-2 bg-blue-600 text-white rounded">
         Add New Product
@@ -56,25 +92,45 @@ const HandleProducts = () => {
       ) : (
         <ul className="space-y-4">
           {products.map((product) => (
-            <li key={product.id} className="p-4 border rounded flex justify-between items-center">
-              <div className="flex items-center space-x-4">
-                <img src={product.image} alt={product.name} className="w-16 h-16 object-cover rounded" />
-                <div>
-                  <p className="text-lg font-medium">{product.name}</p>
-                  <p className="text-gray-600">${product.price}</p>
+            <li
+              key={product._id}
+              className="p-4 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition flex flex-col md:flex-row md:items-center justify-between gap-4"
+            >
+              {/* Image & Info */}
+              <div className="flex gap-4 items-center w-full md:w-2/3">
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-24 h-24 object-cover rounded-lg border"
+                />
+                <div className="space-y-1">
+                  <p className="text-lg font-semibold text-gray-800">{product.name}</p>
+                  <p className="text-sm text-gray-600">INR {product.price}</p>
+                  <p className="text-sm text-gray-600">Category: {product.category}</p>
+                  <p className="text-sm text-gray-600">Stock: {product.stock}</p>
+                  <p className="text-sm text-gray-600">Brand: {product.brand}</p>
                 </div>
               </div>
-              <div className="space-x-2">
-                <button onClick={() => handleEdit(product.id)} className="px-3 py-1 bg-yellow-500 text-white rounded">
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2 md:gap-3">
+                <button
+                  onClick={() => handleEdit(product._id)}
+                  className="px-4 py-1 text-sm font-medium bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition"
+                >
                   Edit
                 </button>
-                <button onClick={() => handleDelete(product.id)} className="px-3 py-1 bg-red-600 text-white rounded">
+                <button
+                  onClick={() => handleDelete(product._id)}
+                  className="px-4 py-1 text-sm font-medium bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+                >
                   Delete
                 </button>
               </div>
             </li>
           ))}
         </ul>
+
       )}
     </div>
   );

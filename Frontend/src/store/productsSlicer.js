@@ -1,30 +1,30 @@
 // redux/productsSlice.js
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-export const fetchProducts = createAsyncThunk("products/fetch", async () => {
-  const response = await axios.get("http://localhost:5000/api/v1/products/all");
-  return response.data.products;
-});
-
+import { createSlice } from "@reduxjs/toolkit";
 
 const productsSlice = createSlice({
   name: "products",
-  initialState: { items: [], status: "idle" },
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchProducts.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.items = action.payload;
-      })
-      .addCase(fetchProducts.rejected, (state) => {
-        state.status = "failed";
-      });
+  initialState: {
+    items: [],
+  },
+  reducers: {
+    setProducts: (state, action) => {
+      state.items = action.payload; // for initial loading
+    },
+    addProduct: (state, action) => {
+      state.items.push(action.payload); // add new product
+    },
+    updateProduct: (state, action) => {
+      const index = state.items.findIndex(p => p._id === action.payload._id);
+      if (index !== -1) {
+        state.items[index] = action.payload; // update existing product
+      }
+    },
+    removeProduct: (state, action) => {
+      state.items = state.items.filter(item => item._id !== action.payload); // remove by id
+    },
   },
 });
+
+export const { setProducts, addProduct, updateProduct, removeProduct } = productsSlice.actions;
 
 export default productsSlice.reducer;

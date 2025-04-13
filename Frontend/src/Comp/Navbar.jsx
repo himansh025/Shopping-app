@@ -1,107 +1,126 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, Menu, User, LogOut } from "lucide-react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Menu, LogOut } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/authSlicer.js";
 import SearchBar from "./SearchBar.jsx";
 import { FaUser } from "react-icons/fa6";
-// import NavLinks from "./NavLinks.jsx";
-// import logo from "../logo.png"; // Your logo image
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showUserRoles, setShowUserRoles] = useState(false);
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
-  const [selectuser,setselectuser]= useState(false)
 
   const handleLogout = () => {
     dispatch(logout());
     navigate("/login");
   };
-  const handleuser = () => {
-  setselectuser(!selectuser);
-  };
-  
+
+  const toggleUserRoles = () => setShowUserRoles(!showUserRoles);
 
   return (
     <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="max-w-full mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
-            {/* <img src={logo} alt="Logo" className="h-12 w-12 mr-2" /> */}
-            <span className="text-xl text-decoration-none ml-5 font-bold text-gray-800">ShopEase</span>
+          <Link to="/" className="flex text-decoration-none items-center">
+            <span className="text-sm md:text-xl font-bold  text-gray-800">ShopEase</span>
           </Link>
-          <SearchBar/>
 
-          {/* Auth Section */}
-          <div className="hidden md:flex space-x-4 items-center">
+          {/* SearchBar */}
+          <div className=" w-fit md:w-full max-w-md">
+            <SearchBar />
+          </div>
+
+          {/* Desktop Auth + Icons */}
+          <div className="hidden md:flex items-center gap-4">
             {user ? (
-              <>
-                {/* <NavLink to="/profile" text="Profile" icon={<User className="h-5 w-5" />} /> */}
-                <button onClick={handleLogout} className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600">
-                  <LogOut className="h-5 w-5 inline" /> Logout
-                </button>
-              </>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              >
+                <LogOut className="inline h-5 w-5 mr-1" /> Logout
+              </button>
             ) : (
-              <>
-
-             
-              {selectuser?(
-                <>
-                 <div className="flex flex-col mt-5 gap-2">
-                 <button
-        onClick={() => navigate("/login", { state: { role: "seller" } })}
-        className="w-full bg-blue-500 text-white px-2 py-1 rounded mb-2"
-      >
-        Seller
-      </button>
-      <button
-        onClick={() => navigate("/login", { state: { role: "user" } })}
-        className="w-full bg-blue-500 text-white px-2 py-1 rounded mb-2"
-      >
-        User
-      </button>
-                 </div>
-                </>
-              ): null}
-              <FaUser className="h-10 w-10 bg-gray-200 p-1 rounded-3xl" onClick={handleuser}  />
-            
-              </>
+              <div className="relative">
+                <FaUser
+                  className="h-9 w-9 cursor-pointer bg-gray-200 p-2 rounded-full"
+                  onClick={toggleUserRoles}
+                />
+                {showUserRoles && (
+                  <div className="absolute top-12 right-0 gap-3 bg-white shadow-lg border rounded p-2 space-y-2 z-10">
+                    <button
+                      onClick={() => {navigate("/login", { state: { role: "seller" } })
+                      setShowUserRoles(!showUserRoles)
+                }
+                    }
+                      className="w-32 bg-blue-500 text-white px-2 m-1 py-1 rounded hover:bg-blue-600"
+                    >
+                      Seller
+                    </button>
+                    <button
+                      onClick={() =>{ navigate("/login", { state: { role: "user" } })
+                setShowUserRoles(!showUserRoles)
+                    }}
+                      className="w-32 bg-blue-500 text-white m-1 px-2 py-1 rounded hover:bg-blue-600"
+                    >
+                      User
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button className="md:hidden text-gray-700" onClick={() => setMenuOpen(!menuOpen)}>
+          {/* Mobile Menu Toggle */}
+          <button
+            className="md:hidden text-gray-700 focus:outline-none"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
             <Menu className="h-6 w-6" />
           </button>
         </div>
       </div>
-     
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Dropdown */}
       {menuOpen && (
-        <div className="md:hidden bg-gray-100 p-3 space-y-2">
+        <div className="md:hidden bg-gray-100 border-t border-gray-300 p-4 space-y-4">
+         
           {user ? (
             <>
-              <MobileNavLink to="/profile" text="Profile" onClick={() => setMenuOpen(false)} />
               <button
                 onClick={() => {
-                //   handleLogout();
+                  handleLogout();
                   setMenuOpen(false);
                 }}
-                className="block w-full text-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                className="block w-full bg-red-500 text-white px-4 py-2 rounded-md text-center hover:bg-red-600"
               >
                 Logout
               </button>
             </>
           ) : (
-            <>
-              <MobileNavLink to="/login" text="Login" onClick={() => setMenuOpen(false)} />
-              <MobileNavLink to="/signup" text="Signup" onClick={() => setMenuOpen(false)} />
-          
-            </>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  navigate("/login", { state: { role: "seller" } });
+                  setMenuOpen(false);
+                }}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              >
+                Login as Seller
+              </button>
+              <button
+                onClick={() => {
+                  navigate("/login", { state: { role: "user" } });
+                  setMenuOpen(false);
+                }}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              >
+                Login as User
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -109,6 +128,14 @@ function Navbar() {
   );
 }
 
-
+const MobileNavLink = ({ to, text, onClick }) => (
+  <NavLink
+    to={to}
+    onClick={onClick}
+    className="flex text-gray-800 text-lg font-medium text-decoration-none items-center justify-center shadow-2xl  hover:text-blue-600 transition"
+  >
+    {text}
+  </NavLink>
+);
 
 export default Navbar;

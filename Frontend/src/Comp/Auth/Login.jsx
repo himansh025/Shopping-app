@@ -31,8 +31,15 @@ const handleLogin = async (data) => {
           "Content-Type": "application/json"
         }
       });
-    } else {
+    }else if(role === "seller") {
       res = await axios.post("http://localhost:5000/api/v1/seller/login", data, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+    }
+     else {
+      res = await axios.post("http://localhost:5000/api/v1/user/login", data, {
         headers: {
           "Content-Type": "application/json"
         }
@@ -47,21 +54,27 @@ const handleLogin = async (data) => {
       const userData = res.data.user;
       
       // Store token in localStorage
-      localStorage.setItem("token", token);
-      
-      // Convert user object to JSON string before storing
-      localStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.setItem("token",token)
+     
+      sessionStorage.setItem("user", JSON.stringify(userData))
       
       console.log("User data being dispatched:", userData);
       
       // Dispatch login action with the correct payload structure
       dispatch(login({ user: userData }));
+      if(res.data?.isVerified){
+        console.log("g")
+        navigate("/dashboard")
+      }
+      // navigate("/dashboard")
+
       navigate("/")
+
     }
   } catch (error) {
-    console.error("Login failed:", error);
+    // console.error("Login failed:", error);
     error("invalid credentials")
-    error('Login failed. Please check your credentials.');
+    // error('Login failed. Please check your credentials.');
   } finally {
     setIsLoading(false);
   }

@@ -52,7 +52,7 @@ const navigate= useNavigate()
                                 View Product
                             </button> */}
                             <button
-                                onClick={() =>navigate(`/placedOrder/:${item.id}`)}
+                                onClick={() =>navigate(`/placedOrder/:${item._id}`)}
                                 className="mt-2 justify-end bg-green-500 text-white px-3 py-1 rounded"
                             >
                                 Add To Cart

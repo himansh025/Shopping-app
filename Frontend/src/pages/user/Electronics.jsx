@@ -1,21 +1,19 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from '../../store/productsSlicer.js';
+// import { fetchProducts } from '../../store/productsSlicer.js';
 import { useNavigate } from "react-router-dom";
 
 const Electronics = () => {
   const dispatch = useDispatch();
-  const { items, status } = useSelector((state) => state.products); // ✅ Correct path
+  const { items } = useSelector((state) => state.products); // ✅ Correct path
 const navigate= useNavigate();
   console.log(items);
 
 
   useEffect(() => {
     
-    if (status === "idle") {
-      dispatch(fetchProducts());
-    }
-  }, [dispatch, status]);
+   
+  }, [items]);
 
   const menProducts = items?.filter((p) => p.attributes.type === "Gadget");
 

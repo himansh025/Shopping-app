@@ -8,9 +8,11 @@ const SellerProfile = () => {
   useEffect(() => {
     const fetchSeller = async () => {
       try {
-        const response = await fetch("https://api.example.com/seller-profile");
-        const data = await response.json();
-        setSeller(data);
+        const user=JSON.parse(sessionStorage.getItem("user"))
+        console.log(user) 
+        // const response = await fetch("https://api.example.com/seller-profile");
+        // const data = await response.json();
+        setSeller(user);
       } catch (error) {
         console.error("Error fetching seller profile:", error);
       } finally {
@@ -41,19 +43,25 @@ const SellerProfile = () => {
           <img
             src={imagePreview || seller.profileImage || "https://via.placeholder.com/150"}
             alt="Seller"
-            className="w-24 h-24 rounded-full border"
+            className="w-24 h-24 rounded-full bg-black text-white border"
           />
-          <input type="file" accept="image/*" onChange={handleImageChange} className="p-2 border rounded" />
-          <p className="text-lg font-medium">{seller.name}</p>
-          <p className="text-gray-600">{seller.email}</p>
+          {/* <input type="file" accept="image/*" onChange={handleImageChange} className="p-2 border rounded" /> */}
+          <p className="text-lg font-medium">Name : {seller.
+businessName
+}</p>
+          <p className="text-gray-600">Email : {seller.email}</p>
+          <p className="text-gray-600">Registration No. : {seller.registrationNumber}</p>
+
+          <p className="text-gray-600">Address : {seller.businessAddress}</p>
           <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">Seller</span>
 
           <div className="mt-4 w-full">
             <h3 className="text-xl font-semibold text-center">Your Listed Products</h3>
+            <p className="text-gray-600">{seller.products.length}</p>
             {seller.products.length > 0 ? (
               <ul className="mt-2 space-y-2">
                 {seller.products.map((product) => (
-                  <li key={product.id} className="p-3 border rounded flex justify-between">
+                  <li key={product._id} className="p-3 border rounded flex justify-between">
                     <span>{product.name} - ${product.price}</span>
                   </li>
                 ))}

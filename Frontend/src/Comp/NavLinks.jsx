@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 
-function NavLinks() {
+function NavLinks({props}) {
   const [isVisible, setIsVisible] = useState(true);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
-
+// console.log(props)
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollPos = window.scrollY;
@@ -27,26 +27,19 @@ function NavLinks() {
         {/* Desktop Nav */}
         <div className="hidden bg-gray-800 mt-40 w-full  justify-center h-20 items-center md:flex gap-10">
           <CustomNavLink to="/" text="Home" />
-          <CustomNavLink to="/shop" text="Shop" />
-          <CustomNavLink to="/cart" text="Cart" />
           <CustomNavLink to="/orders" text="Orders" />
+          <CustomNavLink to="/profile" text="Profile" />
 
         </div>
-        
-        {/* Mobile Menu Button */}
-        {/* <div className="md:hidden flex flex-col gap-10">
-          <CustomNavLink to="/" text="Home" />
-          <CustomNavLink to="/shop" text="Shop" />
-          <CustomNavLink to="/cart" text="Cart" />
-        </div> */}
       </div>
 
       {/* Mobile Nav - Also hides on scroll */}
       <div className={`md:hidden bg-amber-50 transition-transform duration-300 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'} fixed w-full top-20 left-0 z-10`}>
         <div className="flex flex-col items-center gap-6 p-6">
           <CustomNavLink to="/" text="Home" />
-          <CustomNavLink to="/shop" text="Shop" />
-          <CustomNavLink to="/cart" text="Cart" />
+          <CustomNavLink to="/orders" text="Orders" />
+          <CustomNavLink to="/profile" text="Profile" />
+
         </div>
       </div>
       
@@ -63,7 +56,7 @@ function CustomNavLink({ to, text, onClick }) {
       to={to}
       onClick={onClick}
       className={({ isActive }) => 
-        `text-gray-700 hover:text-blue-600 text-lg transition duration-300 ${
+        `text-gray-700 hover:text-blue-600 text-lg text-decoration-none transition duration-300 ${
           isActive ? 'font-bold' : ''
         }`
       }

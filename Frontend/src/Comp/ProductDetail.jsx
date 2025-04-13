@@ -11,14 +11,16 @@ const ProductDetail = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
   const [wishList, setWishList] = useState(false);
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState([]);
   const wishlistSelector = useSelector((state) => state.wishlist);
   const { items } = useSelector((state) => state.products);
-
+  console.log(id)
+// console.log(items)
   const item = items?.filter((item) => item._id === id);
+  console.log(item)
 
   useEffect(() => {
-    if (item?.length > 0) {
+    if (item) {
       setProduct(item[0]);
       setWishList(wishlistSelector.some(wishItem => wishItem._id === item[0]._id));
     }
@@ -144,7 +146,7 @@ const ProductDetail = () => {
           Similar Products
           <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-blue-500"></span>
         </h3>
-        <Card />
+        <Card items ={items} remove={item} />
       </div>
     </div>
   );

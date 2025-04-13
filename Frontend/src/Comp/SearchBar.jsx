@@ -7,16 +7,16 @@ function SearchBar() {
   const handleSearch = () => {
     if (query.trim() !== "") {
       console.log("Searching for:", query);
-      // Implement search functionality here
+      // Implement actual search logic here
     }
   };
 
   return (
-    <div className="flex items-center py-2 px-4 bg-slate-200 border-2 border-gray-100 rounded-full w-full max-w-md">
+    <div className="hidden md:flex items-center py-1 px-2 bg-slate-200 border-2 border-gray-100 rounded-full w-60 md:w-full m-3">
       <input
         type="text"
-        className="flex-1 bg-transparent outline-none px-2 text-sm"
-        placeholder="Search Product here..."
+        className="flex-1 bg-transparent outline-none px-1 text-sm"
+        placeholder="Search Product..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSearch()}

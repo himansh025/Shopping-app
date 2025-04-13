@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-
+import { X } from "lucide-react";
 // ✅ Define Schema Validation
 const productSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
@@ -23,7 +23,7 @@ const productSchema = z.object({
     .refine((files) => files?.length > 0, "At least one image is required"),
 });
 
-const AddProducts = () => {
+const AddProducts = ({ onClose }) => {
   const [images, setImages] = useState([]);
 
   const {
@@ -43,7 +43,7 @@ const AddProducts = () => {
 
   const onSubmit = async (data) => {
     const formData = new FormData();
-    
+
     // Append text fields
     formData.append("name", data.name);
     formData.append("price", data.price);
@@ -51,14 +51,14 @@ const AddProducts = () => {
     formData.append("description", data.description);
     formData.append("stock", data.stock);
     formData.append("brand", data.brand);
-    
+
     // Create attributes object
     const attributeData = {
       size: data.size.split(","),
       material: data.material,
       type: data.type,
     };
-    
+
     // Create seller object
     const sellerData = {
       sellerId: "67c9ab27e24544a4e93f8ad5",
@@ -66,14 +66,14 @@ const AddProducts = () => {
       email: data.sellerEmail,
       contact: data.sellerContact,
     };
-    
+
     // Append objects as stringified JSON
     formData.append("attributes", JSON.stringify(attributeData));
     formData.append("seller", JSON.stringify(sellerData));
-    
+
     // Append images
     images.forEach((image) => formData.append("images", image));
-    
+
     try {
       const response = await axios.post(
         "http://localhost:5000/api/v1/products/create",
@@ -93,10 +93,17 @@ const AddProducts = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="max-w-lg mx-auto p-5 shadow-lg rounded-lg bg-white"
+      className="max-w-lg bg-white text-black mx-auto p-3 shadow-lg rounded-lg"
     >
-      <h2 className="text-xl font-bold mb-4">Upload Product</h2>
-
+      <div className="flex relative justify-center items-center mb-4">
+        <h2 className="text-xl  font-bold">Upload Product</h2>
+        <button
+          className="absolute  top-0 right-0 text-gray-500 hover:text-red-500"
+          onClick={onClose}
+        >
+          <X className="h-6 w-6 text-black" />
+        </button>
+      </div>
       <input
         {...register("name")}
         placeholder="Product Name"
@@ -212,6 +219,7 @@ const AddProducts = () => {
         Upload Product
       </button>
     </form>
+
   );
 };
 

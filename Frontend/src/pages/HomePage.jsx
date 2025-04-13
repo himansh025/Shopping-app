@@ -1,32 +1,32 @@
-import { ShoppingCart, ArrowRight } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import Card from "../Comp/Card";
 import ProductCrousel from "../Comp/ProductCrousel";
 import AllCategories from "../Comp/AllCategories";
 import { useEffect } from "react";
-import { useSelector,useDispatch } from "react-redux";
-import { fetchProducts } from "../store/productsSlicer";
+import { useSelector } from "react-redux";
 import NavLinks from "../Comp/NavLinks";
-function HomePage() {
+import { useContext } from "react";
+import { ToastContext } from "../App";
+function HomePage({data}) {
 
-  const dispatch = useDispatch();
-  const { items, status } = useSelector((state) => state.products); // ✅ Correct path
+
+  const { success, error, info, warning } = useContext(ToastContext);
   const user= useSelector((state)=>state.auth)
-console.log("user is home",user);
-
+ 
   useEffect(() => {
-    
-    if (status === "idle") {
-      dispatch(fetchProducts());
-    }
-  }, [dispatch, status]);
+    console.log(data)
+    // if (status === "idle") {
+      // dispatch(fetchProducts());
+    // }
+  }, []);
 
 
 
   return (
     <div className="min-h-screen w-full bg-gray-100">
       {/* Hero Section */}
-      <NavLinks className=""/>  
+      <NavLinks className="" props={user}/ >  
       <ProductCrousel />
       <section className="bg-white py-16  text-center">
         <h1 className="text-4xl font-bold text-gray-800">
@@ -51,7 +51,7 @@ console.log("user is home",user);
           Featured Products
         </h2>
         <div className=" mt-6 overflow-hidden">
-          <Card  />
+          <Card  items= {data} />
         </div>
       </section>
 
