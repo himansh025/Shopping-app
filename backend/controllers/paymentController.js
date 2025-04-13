@@ -28,50 +28,60 @@ const createOrder = async (req, res) => {
 
     // Cash on Delivery (COD) Order
     if (values.paymentMethod === "COD") {
-      const product = productDetails
-      // console.log("f", product.id);
+      const product = productDetails;
       const productDoc = await Product.findById(product.id);
+      
       if (!productDoc || productDoc.stock < product.quantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Insufficient stock for product: ${product.name}`
-        });
+          return res.status(400).json({
+              success: false,
+              message: `Insufficient stock for product: ${product.name}`
+          });
       }
+  
       // Reduce stock
       productDoc.stock -= product.quantity;
       await productDoc.save();
-
-
+  
+      console.log("doc", productDoc);
+  
       // Create COD Order
       const order = new Order({
-        userId: values.userId || "67c9a7a9e24544a4e93f8ace", // Ensure this is a valid ObjectId
-        products: {
-          productId: productDetails.id,
-          quantity: product.quantity,
-          price: product.price
-        },
-        totalAmount: product.price * product.quantity,
-        name: values.name || "null",
-        email: values.email,
-        phone: values.contact || "344433333",
-        address: values.address,
-        city: values.city,
-        state: values.state,
-        zip: values.zip,
-        landmark: values.landmark,
-        paymentMethod: "COD",
-        status: "Pending",
-        orderDetails: { orderId: uniqueOrderId }
+          userId: values.userId || "67c9a7a9e24544a4e93f8ace", 
+          products: [   // ✅ Wrap inside an array
+              {
+                  productId: productDetails.id,  // ✅ Ensure ObjectId
+                  quantity: product.quantity,
+                  price: product.price,
+                  name: productDoc.name,  
+                  description: productDoc.description, 
+                  images: productDoc.images
+              }
+          ],
+          totalAmount: product.price * product.quantity,
+          name: values.name || "null",
+          email: values.email,
+          phone: values.contact || "344433333",
+          address: values.address,
+          city: values.city,
+          state: values.state,
+          zip: values.zip,
+          landmark: values.landmark,
+          paymentMethod: "COD",
+          status: "Pending",
+          orderDetails: { orderId: uniqueOrderId }
       });
-
+  
       await order.save();
-
+      console.log("ORDER AFTER SAVE", JSON.stringify(order, null, 2)); // ✅ Pretty-print JSON
+  
       return res.status(200).json({
-        success: true,
-        message: "COD Order placed successfully",
-        order
+          success: true,
+          message: "COD Order placed successfully",
+          order,
+          productDetail: productDoc
       });
-    }
+  }
+  
 
     // Online Payment Order
     if (values.paymentMethod === "Online") {
@@ -90,28 +100,48 @@ const createOrder = async (req, res) => {
       };
 
       
-      
       // Create Razorpay order
-      const razorpayOrder = await razorpay.orders.create(options);
-      console.log("razer", razorpayOrder);
-      
-      const order = new Order({
-        userId: values.userId || "67c9a7a9e24544a4e93f8ace",
-        products: [{ productId: productDetails.id, quantity: productDetails.quantity, price: productDetails.price }],
-        totalAmount: productDetails.price * productDetails.quantity,
-        name: values.name || "null",
-        email: values.email,
-        phone: values.contact || "344433333",
-        address: values.address,
-        city: values.city,
-        state: values.state,
-        zip: values.zip,
-        landmark: values.landmark,
-        paymentMethod: "Online",
-        status: "Processing",
-        orderDetails: { orderId: razorpayOrder.id } // Store generated orderId
-      });
-      await order.save();
+const razorpayOrder = await razorpay.orders.create(options);
+console.log("razer", razorpayOrder);
+
+// Find the product details using the product ID
+let id = productDetails.id;
+const prod = await Product.findById(id);
+console.log("prod for confirm",prod);
+
+
+if (!prod) {
+  return res.status(404).json({ success: false, message: "Product not found" });
+}
+
+// Create the order and include the full product details inside `products`
+const order = new Order({
+  userId: values.userId || "67c9a7a9e24544a4e93f8ace",
+  products: [{
+    productId: prod._id,
+    quantity: productDetails.quantity,
+    price: prod.price, // Use the actual product price
+    name: prod.name,  // Adding product details inside products array
+    description: prod.description, 
+    images: prod.images
+  }],
+  totalAmount: prod.price * productDetails.quantity,
+  name: values.name || "null",
+  email: values.email,
+  phone: values.contact || "344433333",
+  address: values.address,
+  city: values.city,
+  state: values.state,
+  zip: values.zip,
+  landmark: values.landmark,
+  paymentMethod: "Online",
+  status: "Processing",
+  orderDetails: { orderId: razorpayOrder.id } // Store generated orderId
+});
+
+await order.save();
+console.log("afeter Order  saved:", order);
+ 
 
       res.status(200).json({
         success: true,
@@ -124,7 +154,8 @@ const createOrder = async (req, res) => {
         orderDetails: {
           name: values.name,
           email: values.email,
-          contact: values.contact
+          contact: values.contact,
+          productDetail:prod
         }
       });
     }

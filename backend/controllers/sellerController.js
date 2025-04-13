@@ -43,7 +43,7 @@ const signup = async (req, res) => {
         expiresAt: new Date(Date.now() + 10 * 60 * 1000) // OTP expires in 10 minutes
       }
     });
-
+    
     await newSeller.save();
 
     // TODO: Send OTP to seller's phone/email
@@ -82,9 +82,11 @@ const verifyOtp = async (req, res) => {
     seller.isVerified = true;
     seller.otp = undefined;
     await seller.save();
+    const token= await generateToken(newSeller._id);
 
     res.status(200).json({
       success: true,
+      token:token,
       message: 'OTP verified successfully'
     });
   } catch (error) {
@@ -103,8 +105,8 @@ const login = async (req, res) => {
     // Find seller
     console.log(email);
     
-    const seller = await Seller.findOne({ email });
-console.log("seller is",seller);
+    const seller = await Seller.findOne({ email })
+// console.log("seller is",seller);
 
     if (!seller) {
       return res.status(404).json({
@@ -131,15 +133,14 @@ console.log("seller is",seller);
       });
     }
 
-       const token = generateToken(seller._id);
-        seller.token = token;
-
-        await seller.save();
-console.log("token saved",seller);
+    const token= generateToken(seller._id);
+    seller.password = "";
+    console.log("seller last",seller);
 
 
     res.status(200).json({
       success: true,
+      user:seller,
       message: 'Login successful',
       token:token
     });

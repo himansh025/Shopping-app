@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/UserModel.js");
+const Order= require("../models/OrderModel.js")
 const { generateToken} = require("../middleware/generateToken.js");
 const nodemailer = require("nodemailer");
 const dotenv =require('dotenv')
@@ -94,18 +95,12 @@ if (!newUser.phone) {
   return res.status(400).json({ error: "Phone number is required" });
 }
 
-    // await newUser.save();
+    await newUser.save();
     const token = generateToken(newUser._id);
 
     console.log("token aaya",token);
     
     delete tempUserStore[email];
-
-    // Save refreshToken to the database
-    newUser.token = token;
-    await newUser.save({ validateBeforeSave: false });
-console.log("new user after token save",newUser);
-
     const options = {
       httpOnly: true,
       secure: true,
@@ -113,7 +108,7 @@ console.log("new user after token save",newUser);
 
     res
       .status(201)
-      .cookie("token", token, options)
+      .cookie(options)
       .json({
         message: "OTP verified successfully",
         user: {
@@ -138,11 +133,6 @@ const login = async (req, res) => {
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
     const token = generateToken(user._id);
-    // const refreshToken = generateRefreshToken(user._id);
-
-    // Save refreshToken to the database
-    user.token = token;
-    await user.save();
 
     const options = {
       httpOnly: true,
@@ -182,4 +172,31 @@ const logout = async (req, res) => {
     .json({messfage: "successfull logout"})
 }
 
-module.exports = { signup, verifyOtp, login, logout };
+const userprofile= async(req,res)=>{
+  const { userId } = req.params; 
+  // console.log("order",userId);
+  if (!userId) {
+    return res.status(404).json({ message: 'UserId not found' });
+  }
+
+  try {
+    const order = await Order.findOne({ userId })
+    .populate('userId', '-password -token')// pulls user details
+      .populate('products');      // pulls product details
+
+      console.log("order",order);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    res.status(200).json({
+      message: "Order details retrieved",
+      order,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+
+}
+
+module.exports = { signup, verifyOtp, login, logout,userprofile };

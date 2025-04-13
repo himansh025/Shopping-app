@@ -1,19 +1,36 @@
-const Order = require('../models/Orders.js');
+const Order = require('../models/OrderModel.js');
+const Product = require('../models/ProductModel.js');
 
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find({});
-    if(orders.lenght>1){
+    const orders = await Order.find();
+    console.log("orders",orders);
+//     const getProductDetails = async () => {
+//       const productIds = orders.flatMap(order => 
+//         order.products ? order.products.map(prod => prod.productId) : []
+//       );
+    
+//       // Fetch product details using productIds
+//       const productDetails = await Product.find({ _id: { $in: productIds } });
+    
+//       return productDetails;
+//     };
+//     let data=await getProductDetails()
+// console.log("data",data.length)
 
+    
+    if(orders.lenght<1){
         res.status(200).json({
             success: true,
             orderlength: orders.length,
-            orders
-        });
+            message:"No Orders Yet"
+          });
     }
     res.status(200).json({
         success: true,
-        message:"No Orders Yet"
+        orders:orders,
+        orderlength: orders.length,
+        message:" Orders Found"
     });
 
   } catch (error) {

@@ -20,6 +20,16 @@ const Order = new mongoose.Schema({
       price: {
         type: Number,
         required: true
+      },
+      // Add these new fields
+      name: {
+        type: String
+      },
+      description: {
+        type: String
+      },
+      images: {
+        type: [String]  // Assuming images is an array of strings (URLs)
       }
     }
   ],
