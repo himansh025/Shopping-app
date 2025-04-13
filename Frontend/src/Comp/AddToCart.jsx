@@ -17,7 +17,7 @@ const AddToCart = () => {
     const wishlistSelector = useSelector((state) => state.wishlist);
     const item = items?.find((item) => item._id === id);
 const cartdata= useSelector((state)=>state.cart)
-
+console.log(cartdata.length)
 
 let already= cartdata.find((item)=>item._id==id)
 console.log("al",already);

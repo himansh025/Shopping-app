@@ -5,7 +5,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import { TailSpin } from 'react-loader-spinner';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../store/authSlice.js';
-
+import axiosInstance from '../Config/apiConfig.js';
 const VerifyOtp = () => {
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
@@ -19,7 +19,8 @@ const VerifyOtp = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await verifyOtp({ email, otp });
+            const response = await axiosInstance.post("/verify-otp",{ email, otp })
+            //  verifyOtp();
             if (response.data) {
                 toast.success('OTP Verified!');
                 localStorage.setItem('token', response.data.user.token);

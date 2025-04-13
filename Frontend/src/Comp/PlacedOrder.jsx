@@ -1,13 +1,11 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import axiosInstance from "../Config/apiConfig";
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
 const RAZORPAY_ID = import.meta.env.VITE_RAZORPAY_ID;
-
-console.log(RAZORPAY_KEY,RAZORPAY_ID);
 
 const PlaceOrder = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -15,8 +13,10 @@ const PlaceOrder = () => {
     const [ProductDetail, setProductDetail] = useState("");
     const {items}= useSelector((state)=>state.products)
     const {id} = useParams()
-    console.log(id);
-    
+    // console.log(id);
+    const cartdata= useSelector((state)=>state.cart)
+console.log(cartdata.length);
+
     const item = items.find((item)=>item._id==id)
 
     useEffect(() => {
@@ -64,18 +64,28 @@ const PlaceOrder = () => {
       console.log(data);
 
         try {
-            const response = await axios.post("http://localhost:5000/api/v1/order/createOrder", {
-                values,
-                productDetails: {
-                    name: ProductDetail.name,
-                    id: ProductDetail._id,
-                    price: ProductDetail.price,
-                    quantity: quantity
-                }
+          const response = await axiosInstance.post("/order/createOrder", {
+            values,
+            productDetails: {
+                name: ProductDetail.name,
+                id: ProductDetail._id,
+                price: ProductDetail.price,
+                quantity: quantity
+            }
+            
+          })
+            // const response = await axios.post("http://localhost:5000/api/v1/order/createOrder", {
+            //     values,
+            //     productDetails: {
+            //         name: ProductDetail.name,
+            //         id: ProductDetail._id,
+            //         price: ProductDetail.price,
+            //         quantity: quantity
+            //     }
                 
-              }, {
-                headers: { "Content-Type": "application/json" }
-              });
+            //   }, {
+            //     headers: { "Content-Type": "application/json" }
+            //   });
               console.log(response);
               setIsLoading(false);
 
@@ -113,15 +123,20 @@ const PlaceOrder = () => {
                 console.log("Payment Response:", response);
     
                 try {
-                    const verifyResponse = await axios.post("http://localhost:5000/api/v1/order/verifyPayment",{
-                            order_id: response.razorpay_order_id,
-                            payment_id: response.razorpay_payment_id,
-                            signature: response.razorpay_signature,
-                        },
-                        {
-                            headers: { "Content-Type": "application/json" },
-                        }
-                    );
+                  const verifyResponse= await axiosInstance.post("/order/verifyPayment",{
+                    order_id: response.razorpay_order_id,
+                    payment_id: response.razorpay_payment_id,
+                    signature: response.razorpay_signature,
+                })
+                    // const verifyResponse = await axios.post("http://localhost:5000/api/v1/order/verifyPayment",{
+                    //         order_id: response.razorpay_order_id,
+                    //         payment_id: response.razorpay_payment_id,
+                    //         signature: response.razorpay_signature,
+                    //     },
+                    //     {
+                    //         headers: { "Content-Type": "application/json" },
+                    //     }
+                    // );
     
                     const result = verifyResponse.data;
                     if (result.success) {

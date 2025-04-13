@@ -29,36 +29,6 @@ const categories = [
 
 console.log("Gadgets Categories:", categories);
 
-  
-    
-//   const categories = [
-//     {
-//       title: "Gadgets",
-//       items: [
-//         { img: "https://example.com/phone.jpg", name: "Phones", path: "/phones",extra:"" },
-//         { img: "https://example.com/laptop.jpg", name: "Laptops", path: "/laptops" ,extra:""}
-//         { img: "https://example.com/accessories.jpg", name: "Accessories", path: "/accessories",extra:"" }
-//         { img: "https://example.com/accessories.jpg", name: "Accessories", path: "/accessories",extra:"" }
-//         { img: "https://example.com/accessories.jpg", name: "Accessories", path: "/accessories",extra:"" }
-//         { img: "https://example.com/accessories.jpg", name: "Accessories", path: "/accessories",extra:"" }
-//         { img: "https://example.com/accessories.jpg", name: "Accessories", path: "/accessories",extra:"" }
-//       ],
-//     }
-    // ,
-    // {
-    //   title: "Home Essentials",
-    //   items: [
-    //     { img: "https://example.com/furniture.jpg", name: "Furniture", path: "/furniture" },
-    //     { img: "https://example.com/kitchen.jpg", name: "Kitchen", path: "/kitchen" },
-    //     { img: "https://example.com/decor.jpg", name: "Decor", path: "/decor" },
-    //     { img: "https://example.com/decor.jpg", name: "Decor", path: "/decor" },
-    //     { img: "https://example.com/decor.jpg", name: "Decor", path: "/decor" },
-    //     { img: "https://example.com/decor.jpg", name: "Decor", path: "/decor" },
-    //     { img: "https://example.com/decor.jpg", name: "Decor", path: "/decor" },
-    //   ],
-    // },
-//   ];
-
   return (
     <div className="w-full mx-auto h-max bg-gray-100 py-10">
    

@@ -4,6 +4,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { X } from "lucide-react";
+// import axiosInstance from "../../Config/apiConfig";
+const apiUrl = import.meta.env.VITE_API_URL;
+
 // ✅ Define Schema Validation
 const productSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
@@ -75,8 +78,8 @@ const AddProducts = ({ onClose }) => {
     images.forEach((image) => formData.append("images", image));
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/v1/products/create",
+      // const response = await axiosInstance.post("/products/create")
+      const response = await axios.post(`${apiUrl}products/create`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

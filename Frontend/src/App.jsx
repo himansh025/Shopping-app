@@ -15,8 +15,8 @@ import Forget from './Comp/Auth/Forget';
 import AddProducts from './Comp/seller/AddProducts';
 import Men from './pages/user/Men';
 import Women from './pages/user/Women';
-import Boy from './pages/user/Boy';
-import Girl from './pages/user/Girl';
+// import Boy from './pages/user/Boy';
+// import Girl from './pages/user/Girl';
 import Electronics from './pages/user/Electronics';
 import Orders from './Comp/Orders';
 
@@ -30,6 +30,7 @@ import axios from 'axios';
 import { setProducts} from './store/productsSlicer'
 import { useDispatch, useSelector } from 'react-redux';
 export const ToastContext = createContext();
+import axiosInstance from './Config/apiConfig';
 
 function App() {
   const [Data,setData]= useState([])
@@ -37,8 +38,8 @@ function App() {
   const { items } = useSelector((state) => state.products); // ✅ Correct path
 
   const fetchProducts =  async () => {
-    const response = await axios.get("http://localhost:5000/api/v1/products/all");
-    // console.log("d",response?.data);
+    const response = await axiosInstance.get("/products/all")
+    console.log("d",response?.data?.products);
     setData(response?.data.products)
     if(response.data){
       dispatch(setProducts(response.data.products))
@@ -48,7 +49,7 @@ function App() {
     fetchProducts()
   },[])
   
-  console.log(items);
+  // console.log(items);
   // Toast helper functions
   const showToast = {
     success: (message) => toast.success(message),

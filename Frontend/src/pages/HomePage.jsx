@@ -3,26 +3,13 @@ import { Link } from "react-router-dom";
 import Card from "../Comp/Card";
 import ProductCrousel from "../Comp/ProductCrousel";
 import AllCategories from "../Comp/AllCategories";
-import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import NavLinks from "../Comp/NavLinks";
 import { useContext } from "react";
 import { ToastContext } from "../App";
 function HomePage({data}) {
-
-
   const { success, error, info, warning } = useContext(ToastContext);
   const user= useSelector((state)=>state.auth)
- 
-  useEffect(() => {
-    console.log(data)
-    // if (status === "idle") {
-      // dispatch(fetchProducts());
-    // }
-  }, []);
-
-
-
   return (
     <div className="min-h-screen w-full bg-gray-100">
       {/* Hero Section */}

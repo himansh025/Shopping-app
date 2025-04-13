@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, ArrowRight, Lock, CheckCircle, AlertCircle } from "lucide-react";
+import axiosInstance from "../../Config/apiConfig";
 
 function Forget() {
   const { register, handleSubmit, formState: { errors, dirtyFields } } = useForm();

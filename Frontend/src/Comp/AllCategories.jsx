@@ -24,10 +24,10 @@ function AllCategories() {
     //   name: "Girl's",
     // },
 
-    
+
   ];
 
-  let cats = ["men", "women","electronics"
+  let cats = ["men", "women", "electronics"
     // ,"boy", "girl"
   ]
 

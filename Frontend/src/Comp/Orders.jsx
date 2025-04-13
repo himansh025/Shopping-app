@@ -1,15 +1,11 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-
+import axiosInstance from '../Config/apiConfig';
 const Orders = () => {
   const [orders, setOrders] = useState([]);
-  // const [orderData, setOrderData] = useState(null);
-  // const { items } = useSelector((state) => state.products); // Ensure correct path
 
   const getOrders = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/v1/orderDetail/allOrders`);
+      const res= axiosInstance.get("/orderDetail/allOrders")
       if (res.data) {
               console.log("data",res.data.orders[0]);
 
@@ -24,15 +20,6 @@ const Orders = () => {
     getOrders();
   }, []);
 
-  // useEffect(() => {
-  //   if (orders.length > 0 && items) {
-  //     const productIds = orders.flatMap((order) => order.products.map((p) => p._id));
-  //     console.log("data",productIds);
-  //     if (productIds.includes(items._id)) {
-  //       setOrderData(items);
-  //     }
-  //   }
-  // }, [orders, items]);
 
   return (
     <div className="max-w-4xl mx-auto p-6">

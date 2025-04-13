@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, User } from "lucide-react";
+import axiosInstance from "../../Config/apiConfig";
 
 const Signup = () => {
   const { register, handleSubmit, formState: { errors, dirtyFields } } = useForm();
@@ -10,8 +11,24 @@ const Signup = () => {
   const { role } = location.state || { role: "user" };
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignup = (data) => {
+  const handleSignup =async (data) => {
     console.log("Signup Data:", data);
+    let res;
+    if(role=="user"){
+      res = await axiosInstance.post("/user/signup",data)
+    }else if(role=="user")
+    {
+      res = await axiosInstance.post("/seller/signup",data)
+    }else{
+      res = await axiosInstance.post("/user/signup",data)
+    }
+
+    if(res){
+      console.log("signup data",res.data)
+      navigate("/verify-otp")
+    }else{
+      // console.log(errors) 
+    }
     // Add your signup logic here
   };
 

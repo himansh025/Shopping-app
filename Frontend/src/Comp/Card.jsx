@@ -4,7 +4,7 @@ function Cart({items,remove}) {
   const [pureitem,setpureitem]= useState([])
   // const {items}= useSelector((state)=>state.products)
   const navigate= useNavigate() 
-  // console.log(items) 
+  console.log(items) 
 
   useEffect(()=>{
 

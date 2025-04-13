@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -7,6 +6,8 @@ import {login} from '../../store/authSlicer.js'
 import { useSelector,useDispatch } from "react-redux";
 import { ToastContext } from "../../App.jsx";
 import { useContext } from "react";
+import axiosInstance from "../../Config/apiConfig.js";
+
 const Login = () => {
   const { register, handleSubmit, formState: { errors, dirtyFields } } = useForm();
   const { success, error, info, warning } = useContext(ToastContext);
@@ -26,24 +27,13 @@ const handleLogin = async (data) => {
     let res;
     
     if (role === "user") {
-      res = await axios.post("http://localhost:5000/api/v1/user/login", data, {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
+      res = await axiosInstance.post("/user/login",data)
+
     }else if(role === "seller") {
-      res = await axios.post("http://localhost:5000/api/v1/seller/login", data, {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
+      res = await axiosInstance.post("/seller/login",data)
     }
      else {
-      res = await axios.post("http://localhost:5000/api/v1/user/login", data, {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
+      res = await axiosInstance.post("/user/login",data)
     }
     
     if (res && res.data) {

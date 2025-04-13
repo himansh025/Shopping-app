@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../Config/apiConfig';
 
 function Profile() {
   const [orderData, setOrderData] = useState(null);
@@ -26,7 +27,7 @@ function Profile() {
   
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/v1/user/user-Profile/${userId}`);
+      const  response= await axiosInstance.get(`/user/user-Profile/${userId}`)
       console.log('Profile data:', response.data);
       
       setOrderData(response.data.order);
