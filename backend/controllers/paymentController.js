@@ -13,7 +13,6 @@ const razorpay = new Razorpay({
 const createOrder = async (req, res) => {
   try {
     const { values, productDetails } = req.body;
-    console.log(values, productDetails);
 
     // Validate input
     if (!values || !productDetails) {
@@ -42,7 +41,6 @@ const createOrder = async (req, res) => {
       productDoc.stock -= product.quantity;
       await productDoc.save();
   
-      console.log("doc", productDoc);
   
       // Create COD Order
       const order = new Order({
@@ -51,6 +49,7 @@ const createOrder = async (req, res) => {
               {
                   productId: productDetails.id,  // ✅ Ensure ObjectId
                   quantity: product.quantity,
+                  sellerId:product.sellerId,
                   price: product.price,
                   name: productDoc.name,  
                   description: productDoc.description, 
@@ -72,7 +71,6 @@ const createOrder = async (req, res) => {
       });
   
       await order.save();
-      console.log("ORDER AFTER SAVE", JSON.stringify(order, null, 2)); // ✅ Pretty-print JSON
   
       return res.status(200).json({
           success: true,
@@ -81,7 +79,6 @@ const createOrder = async (req, res) => {
           productDetail: productDoc
       });
   }
-  
 
     // Online Payment Order
     if (values.paymentMethod === "Online") {
@@ -98,17 +95,13 @@ const createOrder = async (req, res) => {
           products: JSON.stringify(productDetails)
         }
       };
-
       
       // Create Razorpay order
 const razorpayOrder = await razorpay.orders.create(options);
-console.log("razer", razorpayOrder);
 
 // Find the product details using the product ID
 let id = productDetails.id;
 const prod = await Product.findById(id);
-console.log("prod for confirm",prod);
-
 
 if (!prod) {
   return res.status(404).json({ success: false, message: "Product not found" });
@@ -120,6 +113,7 @@ const order = new Order({
   products: [{
     productId: prod._id,
     quantity: productDetails.quantity,
+    sellerId:productDetails.sellerId,
     price: prod.price, // Use the actual product price
     name: prod.name,  // Adding product details inside products array
     description: prod.description, 
@@ -140,7 +134,6 @@ const order = new Order({
 });
 
 await order.save();
-console.log("afeter Order  saved:", order);
  
 
       res.status(200).json({
@@ -188,7 +181,6 @@ const verifyPayment = async (req, res) => {
       .update(order_id + "|" + payment_id)
       .digest("hex");
 
-    console.log("sig", generatedSignature);
 
     if (generatedSignature !== signature) {
       return res.status(400).json({
@@ -196,12 +188,10 @@ const verifyPayment = async (req, res) => {
         message: "Payment verification failed"
       });
     }
-console.log("order id",order_id);
 
 
   // Find and update order
   const order = await Order.findOne({ "orderDetails.orderId": order_id });
-    console.log(order);
 
 
     if (!order) {
@@ -227,10 +217,8 @@ console.log("order id",order_id);
     }}else{
       const prodcount= order.products[0];
       
-      console.log("single product",prodcount);
 
       const product = await Product.findById(prodcount.productId);
-      console.log("product found",product);
 
       if (product) {
         product.stock -= prodcount.quantity;

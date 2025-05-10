@@ -31,9 +31,13 @@ const User = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
     },
-    token: {
+    role: {
       type: String,
-    }
+      enum: ['user'],
+      default: 'user'
+    },
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+    cart: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
   },
   { timestamps: true }
 );

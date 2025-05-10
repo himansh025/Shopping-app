@@ -102,11 +102,7 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find seller
-    console.log(email);
-    
     const seller = await Seller.findOne({ email })
-// console.log("seller is",seller);
 
     if (!seller) {
       return res.status(404).json({
@@ -135,7 +131,6 @@ const login = async (req, res) => {
 
     const token= generateToken(seller._id);
     seller.password = "";
-    console.log("seller last",seller);
 
 
     res.status(200).json({
@@ -168,4 +163,46 @@ const logout = async (req, res) => {
     });
   }
 };
-module.exports={login,logout,verifyOtp,signup }
+
+
+
+const profile = async (req, res) => {
+  try {
+    // Get seller ID from authenticated user
+    const sellerId = req.user.id;
+    
+    if (!sellerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Seller ID not found'
+      });
+    }
+    
+    // Find seller by ID and exclude sensitive fields
+    const seller = await Seller.findById(sellerId)
+      .select('-password -otp -token')
+      .populate('products', 'name price images category stock')
+      .lean();
+    
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: 'Seller not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      seller
+    });
+    
+  } catch (error) {
+    console.error('Error in seller profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching seller profile',
+      error: error.message
+    });
+  }
+};
+module.exports={login,logout,verifyOtp,signup,profile }

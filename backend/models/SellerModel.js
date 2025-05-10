@@ -42,8 +42,10 @@ const Seller = new mongoose.Schema({
     code: String,
     expiresAt: Date
   },
-  token:{
-    type:String
+  role: {
+    type: String,
+    enum: ['seller'],
+    default: 'seller'
   }
 }, { timestamps: true });
 

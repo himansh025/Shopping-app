@@ -1,4 +1,5 @@
 const Product = require('../models/ProductModel.js');
+const User = require('../models/UserModel.js');
 const { uploadOnCloudinary } = require('../utils/cloudinary.js');
 // Controller for creating products
 // const mongoose = require("mongoose")
@@ -26,7 +27,6 @@ const createProduct = async (req, res) => {
     
     const attributesString = JSON.parse(attributes);
     const sellerStrrng = JSON.parse(seller);
-        console.log("fed",sellerStrrng)
 
     // Validate seller information
     if (!seller ) {
@@ -66,9 +66,6 @@ const createProduct = async (req, res) => {
       }
     }
 
-    // console.log(seller.sellerId, seller.name,
-    //   seller.email,seller.contact);
-    
     // Create product with all data
     const newProduct =await new Product({
       name,
@@ -107,20 +104,74 @@ const createProduct = async (req, res) => {
 // Get all products
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const { name } = req.query;
+
+    // Build filter object for searching
+    let filter = {};
+
+    // If there is a search query in 'name', apply it across multiple fields
+    if (name) {
+      const searchQuery = { $regex: name, $options: 'i' }; // Case-insensitive search
+      filter = {
+        $or: [
+          { name: searchQuery },  // Search in the product name
+          { category: searchQuery },  // Search in the category
+          { brand: searchQuery }  // Search in the brand
+        ]
+      };
+    }
+
+    // Fetch products that match the filter
+    const products = await Product.find(filter);
+
     res.status(200).json({
       success: true,
       count: products.length,
-      products
+      products,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch products',
-      error: error.message
+      error: error.message,
     });
   }
 };
+
+
+const getAllSellerProd = async (req, res) => {
+  try {
+    const { name } = req.query;
+
+    // Always filter by seller.sellerId
+    const filter = { "seller.sellerId": req.user.id };
+console.log(filter)
+
+    if (name) {
+      const searchQuery = { $regex: name, $options: 'i' };
+      filter.$or = [
+        { name: searchQuery },
+        { category: searchQuery },
+        { brand: searchQuery }
+      ];
+    }
+
+    const products = await Product.find(filter);
+console.log(products)
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch products',
+      error: error.message,
+    });
+  }
+};
+
 
 // Get product by ID
 const getProductById = async (req, res) => {
@@ -285,11 +336,79 @@ const getProductsBySeller = async (req, res) => {
   }
 };
 
+
+const wishlist= async (req, res) => {
+  const userId = req.user.id; 
+  const id = req.params.id;
+
+  try {
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const index = user.wishlist.indexOf(id);
+
+    if (index > -1) {
+      // already in wishlist -> remove
+      user.wishlist.splice(index, 1);
+    } else {
+      // not in wishlist -> add
+      user.wishlist.push(id);
+    }
+
+    await user.save();
+
+    res.status(200).json({ wishlist: user.wishlist });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong", error });
+  }
+};
+
+
+const addToCart = async (req, res) => {
+  const userId = req.user.id;
+  const productId = req.params.id;
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.cart.includes(productId)) {
+      return res.status(400).json({ message: "Product already in cart" });
+    }
+    user.cart.push(productId);
+    await user.save();
+    res.status(200).json({ cart: user.cart, message: "Product added to cart" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to add to cart", error: err });
+  }
+};
+
+const removeFromCart = async (req, res) => {
+  const userId = req.user.id;
+  const productId = req.params.id;
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    user.cart = user.cart.filter(id => id.toString() !== productId);
+    await user.save();
+    res.status(200).json({ cart: user.cart, message: "Product removed from cart" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to remove from cart", error: err });
+  }
+};
+
+
 module.exports = {
   createProduct,
   getAllProducts,
   getProductById,
   updateProduct,
   deleteProduct,
-  getProductsBySeller
+  getProductsBySeller,
+  wishlist,
+  addToCart,
+  removeFromCart,
+  getAllSellerProd
 };

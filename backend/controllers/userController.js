@@ -20,7 +20,6 @@ const generateOTP = (length) => {
   }
   return otp;
 }
-// console.log("auth", process.env.PASSWORD)
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -44,10 +43,8 @@ const signup = async (req, res) => {
     if (userExists) return res.status(400).json({ error: "User already exists!" });
 
     const otp = generateOTP(4);
-    console.log(otp);
 
     tempUserStore[email] = { username,fullname, email, password, otp, phone };
-console.log(tempUserStore);
 
     const mailOptions = {
       from: process.env.EMAIL,
@@ -55,11 +52,9 @@ console.log(tempUserStore);
       subject: `Hello! ${fullname}, Please Verify Your OTP`,
       html: `<strong>Your OTP code for Signup  is: ${otp}</strong>`,
     };
-    // console.log(mailOptions);
     
     try {
       const data = await transporter.sendMail(mailOptions);
-      console.log("data", data);
       res.status(200).json((200, email, "OTP sent successfully"));
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -75,7 +70,6 @@ const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
     const storedUser = tempUserStore[email];
-console.log(storedUser);
 
     if (!storedUser) {
       return res.status(400).json({ error: "No OTP request found for this email" });
@@ -89,7 +83,6 @@ console.log(storedUser);
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ username,fullname, email, phone, password: hashedPassword });
-console.log("user create hogya",newUser);
 
 if (!newUser.phone) {
   return res.status(400).json({ error: "Phone number is required" });
@@ -98,7 +91,6 @@ if (!newUser.phone) {
     await newUser.save();
     const token = generateToken(newUser._id);
 
-    console.log("token aaya",token);
     
     delete tempUserStore[email];
     const options = {
@@ -144,7 +136,7 @@ const login = async (req, res) => {
       .cookie("token", token, options)
       .json({
         token,
-        user: { id: user._id, fullname: user.fullname, email: user.email },
+        user: user,
       });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -173,18 +165,17 @@ const logout = async (req, res) => {
 }
 
 const userprofile= async(req,res)=>{
-  const { userId } = req.params; 
-  // console.log("order",userId);
+
+const userId= req.user._id
   if (!userId) {
     return res.status(404).json({ message: 'UserId not found' });
   }
 
   try {
-    const order = await Order.findOne({ userId })
-    .populate('userId', '-password -token')// pulls user details
-      .populate('products');      // pulls product details
+    const user= await User.findById(userId).select('-password')
 
-      console.log("order",order);
+    const order = await Order.find({ userId })
+    
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -192,11 +183,45 @@ const userprofile= async(req,res)=>{
     res.status(200).json({
       message: "Order details retrieved",
       order,
+      products:order.products,
+      user
     });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 
 }
+const userwishlist=  async (req, res) => {
 
-module.exports = { signup, verifyOtp, login, logout,userprofile };
+  const userId = req.user.id; // (get user ID from token or session)
+
+  try {
+    const user = await User.findById(userId).populate('wishlist');
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ wishlist: user.wishlist });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong", error });
+  }
+};
+
+const userCart=  async (req, res) => {
+  const userId = req.user.id; // (get user ID from token or session)
+  try {
+    if(!userId){
+      return res.status(404).json({ message: "user not found" });
+    }
+    const usercart = await User.findById(userId).populate('cart');
+    if (!usercart) {
+      return res.status(404).json({ message: "usercart not found" });
+    }
+
+    res.status(200).json({ cart: usercart.cart,message :"successfullty get the user cart data" });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong", error });
+  }
+};
+module.exports = { signup, verifyOtp, login, logout,userprofile,userwishlist,userCart };

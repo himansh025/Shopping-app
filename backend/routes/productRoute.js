@@ -7,30 +7,38 @@ const {
   getProductById,
   updateProduct,
   deleteProduct,
-  // getProductsBySeller
+  wishlist,
+  addToCart,removeFromCart,
+  getAllSellerProd
 } = require('../controllers/productController');
+const {authorizeuser,authMiddleware,authorizeseller}= require("../middleware/authMiddleware.js")
 
-// Route to create a new product with up to 5 images
+router.get('/seller/all',authMiddleware,authorizeseller, getAllSellerProd);
+
 router.post(    
   '/create', 
-  upload.array('images', 5),  // 'images' is the field name, max 5 files
+  upload.array('images', 5), 
+  authMiddleware,authorizeseller,
   createProduct
 );
 
-// Route to update a product, allowing additional image uploads
 router.put(
   '/update/:productId', 
-  upload.array('images', 5),  // Optional image upload
+  upload.array('images', 5),
+  authMiddleware,authorizeseller,  // Optional image upload
   updateProduct
 );
 
 // Route to delete a product
-router.delete('/delete/:productId', deleteProduct);
+router.delete('/delete/:productId',authMiddleware,authorizeseller, deleteProduct);
 
 // Route to get all products
 router.get('/all', getAllProducts);
 
 // Rou  te to get a single product by ID
 router.get('/:productId', getProductById);
+router.put('/wishlist/:id',authMiddleware,authMiddleware,authorizeuser,wishlist)
+router.post("/productCart/:id", authMiddleware,authorizeuser,addToCart);     // Add to cart
+router.delete("/productCart/:id", authMiddleware,authorizeuser, removeFromCart); // Remove from cart
 
 module.exports = router;
