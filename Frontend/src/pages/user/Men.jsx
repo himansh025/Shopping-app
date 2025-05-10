@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const Men = () => {
   const { items } = useSelector((state) => state.products); // ✅ Correct path
 const navigate= useNavigate();
-  console.log(items);
+  // console.log(items);
   // localStorage.clear();
   // window.location.reload();
   

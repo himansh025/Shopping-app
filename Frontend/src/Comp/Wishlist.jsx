@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 function Wishlist() {
     const wishlist = useSelector((state) => state.wishlist);
-    console.log(wishlist, "kuch hai");
+    // console.log(wishlist, "kuch hai");
 const [item,setitem]= useState("")
 useEffect(() => {
     setitem(wishlist)
@@ -23,8 +23,8 @@ const navigate= useNavigate()
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {wishlist.map((item) => (
-                        <div key={item.id} className="border p-3 rounded-md">
-                            <img src={item.image} alt={item.name} className="h-40  w-full rounded-lg object-cover" />
+                        <div key={item._id} className="border p-3 rounded-md">
+                            <img src={item.images} alt={item.name} className="h-40  w-full rounded-lg object-cover" />
                             <h3 className="text-lg font-semibold mt-2">{item.name}</h3>
                             <div className="flex justify-between">
                                 <p className="text-gray-700"> Price : {item.price}</p>

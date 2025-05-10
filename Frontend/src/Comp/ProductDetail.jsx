@@ -5,35 +5,57 @@ import { CiHeart } from "react-icons/ci";
 import { useDispatch, useSelector } from "react-redux";
 import { addToWishlist, removeFromWishlist } from "../store/wishlistSlice";
 import Card from '../Comp/Card'
-
+import axiosInstance from "../Config/apiConfig";
 const ProductDetail = () => {
-  const navigate = useNavigate();
+  const navigate= useNavigate()
   const dispatch = useDispatch();
   const { id } = useParams();
   const [wishList, setWishList] = useState(false);
   const [product, setProduct] = useState([]);
   const wishlistSelector = useSelector((state) => state.wishlist);
   const { items } = useSelector((state) => state.products);
-  console.log(id)
-// console.log(items)
-  const item = items?.filter((item) => item._id === id);
-  console.log(item)
-
+  const { user } = useSelector((state) => state.auth);
+  // console.log("is user",user)
+  const item = items?.find((item) => item._id === id);
   useEffect(() => {
     if (item) {
-      setProduct(item[0]);
-      setWishList(wishlistSelector.some(wishItem => wishItem._id === item[0]._id));
+      setProduct(item);
+      setWishList(wishlistSelector.some(wishItem => wishItem._id === id));
     }
   }, [id, wishlistSelector, item]);
 
-  const toggleWishlist = () => {
-    if (wishList) {
-      dispatch(removeFromWishlist(product._id));
-    } else {
-      dispatch(addToWishlist(product));
+  const toggleWishlist = async () => {
+    if (!user) {
+      return navigate("/login");
     }
-    setWishList(!wishList);
+  
+    try {
+      const token = sessionStorage.getItem("token");
+  
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+      };
+  
+      if (wishList) {
+        // REMOVE FROM WISHLIST
+        const res = await axiosInstance.put(`/products/wishlist/${id}`, {}, config);
+        // console.log("Removed from wishlist:", res.data.wishlist);
+  
+        dispatch(removeFromWishlist(product._id));
+        setWishList(false);
+      } else {
+        // ADD TO WISHLIST
+        const res = await axiosInstance.put(`/products/wishlist/${id}`, {}, config);
+        // console.log("Added to wishlist:", res.data.wishlist);
+  
+        setWishList(true);
+        dispatch(addToWishlist(product));
+      }
+    } catch (error) {
+      // console.log("Wishlist toggle error:", error);
+    }
   };
+  
 
   if (!product) {
     return (
@@ -51,7 +73,7 @@ const ProductDetail = () => {
           <div className="md:w-1/2 bg-gray-50">
             <div className="relative h-80 md:h-full overflow-hidden">
               <img
-                src={product.images}
+                src={product?.images}
                 alt={product.name}
                 className="w-full h-[550px] object-cover transition-transform duration-200 hover:scale-103"
               />
@@ -117,21 +139,21 @@ const ProductDetail = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
-                onClick={() => navigate(`/addToCart/${product._id}`)}
+                onClick={() =>{user && user.role==="user"? navigate(`/addToCart/${product._id}`):navigate("/login")}}
                 className="bg-blue-500 py-3 text-white rounded-md shadow-sm hover:bg-blue-600 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none"
               >
                 Add to Cart
               </button>
               
               <button
-                onClick={() => navigate("/wishlist")}
+                onClick={() =>{user && user.role==="user"? navigate("/wishlist") : navigate("/login")}}
                 className="bg-gray-100 py-3 text-gray-800 rounded-md shadow-sm hover:bg-gray-200 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none"
               >
                 View Wishlist
               </button>
               
               <button
-                onClick={() => navigate(`/placedOrder/${product._id}`)}
+                onClick={() => {user && user?.role== "user"? navigate(`/placedOrder/${product._id}`):navigate("/login")}}
                 className="bg-green-500 py-3 text-white rounded-md shadow-sm hover:bg-green-600 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none"
               >
                 Buy Now

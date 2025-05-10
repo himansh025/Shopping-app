@@ -7,7 +7,7 @@ const Electronics = () => {
   const dispatch = useDispatch();
   const { items } = useSelector((state) => state.products); // ✅ Correct path
 const navigate= useNavigate();
-  console.log(items);
+  // console.log(items);
 
 
   useEffect(() => {

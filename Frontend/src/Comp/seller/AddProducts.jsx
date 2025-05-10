@@ -85,7 +85,7 @@ const AddProducts = ({ onClose }) => {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-      console.log("Product uploaded:", response.data);
+      // console.log("Product uploaded:", response.data);
       alert("Product uploaded successfully!");
     } catch (error) {
       console.error("Error uploading product:", error);

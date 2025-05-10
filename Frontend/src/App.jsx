@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import HomePage from './pages/HomePage';
+import HomePage from './pages/user/HomePage';
 import Layout from './Comp/Layout';
 import AddToCart from './Comp/AddToCart';
 import PlaceOrder from './Comp/PlacedOrder';
@@ -15,42 +15,70 @@ import Forget from './Comp/Auth/Forget';
 import AddProducts from './Comp/seller/AddProducts';
 import Men from './pages/user/Men';
 import Women from './pages/user/Women';
-// import Boy from './pages/user/Boy';
-// import Girl from './pages/user/Girl';
 import Electronics from './pages/user/Electronics';
-import Orders from './Comp/Orders';
-
-// Create a toast context to make toast functions available throughout the app
-import { createContext, useState } from 'react';
-import Profile from './Comp/user/Profile';
-import HandleProducts from './pages/seller/HandleProducts';
-import SellerProfile from './pages/seller/SellerProfile'
-import { useEffect } from 'react';
-import axios from 'axios';
-import { setProducts} from './store/productsSlicer'
-import { useDispatch, useSelector } from 'react-redux';
-export const ToastContext = createContext();
 import axiosInstance from './Config/apiConfig';
+import Orders from './Comp/Orders';
+import Dashboard from './pages/seller/Dashboard';
+import Profile from './pages/user/Profile';
+import SellerProfile from './pages/seller/SellerProfile'
+import { useDispatch, useSelector } from 'react-redux';
+import { createContext, useState } from 'react';
+import { useEffect } from 'react';
+import { loadAllProducts, setProducts } from './store/productsSlicer'
+import { VerifyOtp } from './Comp/VertifyOtp';
+import { setWishlist } from './store/wishlistSlice';
+import { setToCart } from './store/cartSlicer';
+export const ToastContext = createContext();
 
 function App() {
-  const [Data,setData]= useState([])
-  const dispatch= useDispatch()
-  const { items } = useSelector((state) => state.products); // ✅ Correct path
+  const [Data, setData] = useState([])
+  const dispatch = useDispatch()
+  const { user, status } = useSelector((state) => state.auth)
+  // console.log(user)
+  const token = sessionStorage.getItem("token")
 
-  const fetchProducts =  async () => {
-    const response = await axiosInstance.get("/products/all")
-    console.log("d",response?.data?.products);
-    setData(response?.data.products)
-    if(response.data){
-      dispatch(setProducts(response.data.products))
+  const fetchWishlist = async () => {
+    try {
+      const res = await axiosInstance.get('/user/user-wishlist', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      dispatch(setWishlist(res.data.wishlist));
+    } catch (error) {
+      // console.log("Error fetching wishlist", error);
     }
   };
-  useEffect(()=>{
+
+  const fetchCartlist = async () => {
+    try {
+      const res = await axiosInstance.get('/user/user-cart', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      dispatch(setToCart(res.data.cart));
+    } catch (error) {
+      console.log("Error fetching cart", error);
+
+    }
+  };
+
+  const fetchProducts = async () => {
+    const response = await axiosInstance.get("/products/all",{params:{}})
+    // console.log("d",response?.data?.products);
+    setData(response?.data.products)
+    if (response.data) {
+dispatch(loadAllProducts(response.data.products));
+    }
+  };
+
+
+  useEffect(() => {
+    if (status && user?.role=="user") {
+      fetchWishlist();
+      fetchCartlist();
+    }
     fetchProducts()
-  },[])
-  
-  // console.log(items);
-  // Toast helper functions
+  }, [user])
+
+
   const showToast = {
     success: (message) => toast.success(message),
     error: (message) => toast.error(message),
@@ -63,29 +91,37 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Layout />}>
-            <Route index element={<HomePage data={Data} />} />
-            <Route path="/addToCart/:id" element={<AddToCart />} />
-            <Route path="/placedOrder/:id" element={<PlaceOrder />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/add" element={<AddProducts />} />
-            <Route path="/item-detail/:id" element={<ProductDetail />} />
+            {user?.role != "seller" &&
+              <Route index element={<HomePage data={Data} />} />}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forget" element={<Forget />} />
+            <Route path="/verify-otp" element={<VerifyOtp />} />
+            <Route path="/item-detail/:id" element={<ProductDetail />} />
             <Route path="/men" element={<Men />} />
             <Route path="/women" element={<Women />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/profile" element={<Profile />} />
-
-
             <Route path="/electronics" element={<Electronics />} />
-            {/* <Route path="/boy" element={<Boy />} /> */}
-            {/* <Route path="/girl" element={<Girl />} /> */}
 
-            <Route path="/seller-profile" element={<SellerProfile/>} />
-            <Route path="/dashboard" element={<HandleProducts />} />
 
-          
+            {user?.role == "seller" && (
+              <>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/profile" element={<SellerProfile />} />
+                <Route path="/add" element={<AddProducts />} />
+                <Route path="/orders" element={<Orders />} />
+
+              </>
+            )}
+
+            {user?.role === "user" && (
+              <>
+                <Route path="/addToCart/:id" element={<AddToCart />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/placedOrder/:id" element={<PlaceOrder />} />
+              </>
+            )}
 
           </Route>
         </Routes>

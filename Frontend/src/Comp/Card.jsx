@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {  useNavigate } from 'react-router-dom';
-function Cart({items,remove}) {
+function Card({items,remove}) {
   const [pureitem,setpureitem]= useState([])
   // const {items}= useSelector((state)=>state.products)
   const navigate= useNavigate() 
-  console.log(items) 
+  // console.log(items) 
 
   useEffect(()=>{
 
@@ -35,7 +35,7 @@ const handleitem= (item)=>{
           <p className="text-gray-600 text-sm">Brand: {item.brand}</p>
           <p className="text-gray-700 text-sm">Price: ₹{item.price}</p>
         <div className='flex justify-center rounded-3xl'> 
-        <button onClick={()=>handleitem(item._id)} className="mt-auto w-max bg-green-600 text-white px-2 py-2 text-md   hover:bg-green-700">
+        <button onClick={()=>handleitem(item._id)} className="mt-auto w-max bg-green-600  text-white px-2 py-2 text-md   hover:bg-green-700">
             View Item
           </button>
         </div>
@@ -45,4 +45,4 @@ const handleitem= (item)=>{
       );
 }
 
-export default Cart;
+export default Card;

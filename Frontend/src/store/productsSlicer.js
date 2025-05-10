@@ -5,26 +5,23 @@ const productsSlice = createSlice({
   name: "products",
   initialState: {
     items: [],
+    searchActive: false, // <-- New flag
   },
   reducers: {
     setProducts: (state, action) => {
-      state.items = action.payload; // for initial loading
+      state.items = action.payload;
+      state.searchActive = true;
     },
-    addProduct: (state, action) => {
-      state.items.push(action.payload); // add new product
+    loadAllProducts: (state, action) => {
+      state.items = action.payload;
+      state.searchActive = false;
     },
-    updateProduct: (state, action) => {
-      const index = state.items.findIndex(p => p._id === action.payload._id);
-      if (index !== -1) {
-        state.items[index] = action.payload; // update existing product
-      }
-    },
-    removeProduct: (state, action) => {
-      state.items = state.items.filter(item => item._id !== action.payload); // remove by id
-    },
+    clearSearch: (state) => {
+      state.searchActive = false;
+    }
   },
 });
 
-export const { setProducts, addProduct, updateProduct, removeProduct } = productsSlice.actions;
+export const { setProducts,clearSearch,loadAllProducts } = productsSlice.actions;
 
 export default productsSlice.reducer;

@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 
 function SubCat() {
     const {items}= useSelector((state)=>state.products)
-    console.log("lets sub",items);
+    // console.log("lets sub",items);
 const tech = items?.filter((item) => item.attributes.type === "Gadget");
-console.log("Filtered Gadgets:", tech);
+// console.log("Filtered Gadgets:", tech);
 
 // Organizing gadgets into categories dynamically
 const Gadgets = tech.reduce((acc, item) => {
@@ -27,7 +27,7 @@ const categories = [
   },
 ];
 
-console.log("Gadgets Categories:", categories);
+// console.log("Gadgets Categories:", categories);
 
   return (
     <div className="w-full mx-auto h-max bg-gray-100 py-10">

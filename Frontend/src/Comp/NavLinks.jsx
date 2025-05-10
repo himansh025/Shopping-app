@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 
-function NavLinks({props}) {
+function NavLinks() {
   const [isVisible, setIsVisible] = useState(true);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
+    const { user } = useSelector((state) => state.auth);
 // console.log(props)
   useEffect(() => {
     const handleScroll = () => {
@@ -23,13 +25,26 @@ function NavLinks({props}) {
 
   return (
     <>
-      <div className={`h-20 w-full bg-gray-100 shadow-md flex justify-center items-center px-6 fixed top-0 left-0 right-0 z-20 transition-transform duration-300 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <div className={`h-20 w-full bg-gray-100  shadow-md flex justify-center items-center px-6 fixed top-0 left-0 right-0 z-20 transition-transform duration-300 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         {/* Desktop Nav */}
         <div className="hidden bg-gray-800 mt-40 w-full  justify-center h-20 items-center md:flex gap-10">
-          <CustomNavLink to="/" text="Home" />
-          <CustomNavLink to="/orders" text="Orders" />
-          <CustomNavLink to="/profile" text="Profile" />
-
+          {/* <LayoutDashboardIcon className='h-5 w-5 ' /> */}
+          {user && user?.role =="seller" &&(
+            <>
+            <CustomNavLink to="/" text="Dashboard" />
+            <CustomNavLink to="/profile" text="Profile" />
+            <CustomNavLink to="/orders" text="orders" />
+        
+            </>
+          )}
+          {user && user.role=="user" &&(
+            <>
+            <CustomNavLink to="/" text="Home" />
+            <CustomNavLink to="/orders" text="Orders" />
+            <CustomNavLink to="/profile" text="Profile" />
+        
+            </>
+          )}
         </div>
       </div>
 
@@ -37,8 +52,13 @@ function NavLinks({props}) {
       <div className={`md:hidden bg-amber-50 transition-transform duration-300 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'} fixed w-full top-20 left-0 z-10`}>
         <div className="flex flex-col items-center gap-6 p-6">
           <CustomNavLink to="/" text="Home" />
-          <CustomNavLink to="/orders" text="Orders" />
-          <CustomNavLink to="/profile" text="Profile" />
+          {user && user?.role=="user" &&(
+            <>
+            <CustomNavLink to="/orders" text="Orders" />
+            <CustomNavLink to="/profile" text="Profile" />
+        
+            </>
+          )}
 
         </div>
       </div>

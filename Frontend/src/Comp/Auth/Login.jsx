@@ -19,11 +19,11 @@ const Login = () => {
   const user= useSelector((state)=>state.auth);
 const dispatch= useDispatch();
 
-console.log("user",user)
+// console.log("user",user)
 const handleLogin = async (data) => {
   setIsLoading(true);
   try {
-    console.log("Login Data:", data);
+    // console.log("Login Data:", data);
     let res;
     
     if (role === "user") {
@@ -38,7 +38,7 @@ const handleLogin = async (data) => {
     
     if (res && res.data) {
       success('Login successful!');
-      console.log(res.data);
+      // console.log(res.data);
       
       const token = res.data.token;
       const userData = res.data.user;
@@ -48,14 +48,14 @@ const handleLogin = async (data) => {
      
       sessionStorage.setItem("user", JSON.stringify(userData))
       
-      console.log("User data being dispatched:", userData);
+      // console.log("User data being dispatched:", userData);
       
       // Dispatch login action with the correct payload structure
       dispatch(login({ user: userData }));
       if(res.data?.isVerified){
-        console.log("g")
+        // console.log("g")
         navigate("/dashboard")
-      }
+      } 
       // navigate("/dashboard")
 
       navigate("/")

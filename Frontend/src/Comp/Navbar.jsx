@@ -1,25 +1,23 @@
-import React, { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, LogOut } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/authSlicer.js";
-import SearchBar from "./SearchBar.jsx";
 import { FaUser } from "react-icons/fa6";
+import SearchBar from "./SearchBar.jsx";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showUserRoles, setShowUserRoles] = useState(false);
   const navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-
   const handleLogout = () => {
     dispatch(logout());
     navigate("/login");
   };
 
   const toggleUserRoles = () => setShowUserRoles(!showUserRoles);
-
   return (
     <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="max-w-full mx-auto px-4">
@@ -28,12 +26,11 @@ function Navbar() {
           <Link to="/" className="flex text-decoration-none items-center">
             <span className="text-sm md:text-xl font-bold  text-gray-800">ShopEase</span>
           </Link>
-
-          {/* SearchBar */}
-          <div className=" w-fit md:w-full max-w-md">
-            <SearchBar />
-          </div>
-
+      
+            <div className=" w-fit md:w-full max-w-md">
+              <SearchBar />
+            </div>
+     
           {/* Desktop Auth + Icons */}
           <div className="hidden md:flex items-center gap-4">
             {user ? (
@@ -52,18 +49,20 @@ function Navbar() {
                 {showUserRoles && (
                   <div className="absolute top-12 right-0 gap-3 bg-white shadow-lg border rounded p-2 space-y-2 z-10">
                     <button
-                      onClick={() => {navigate("/login", { state: { role: "seller" } })
-                      setShowUserRoles(!showUserRoles)
-                }
-                    }
+                      onClick={() => {
+                        navigate("/login", { state: { role: "seller" } })
+                        setShowUserRoles(!showUserRoles)
+                      }
+                      }
                       className="w-32 bg-blue-500 text-white px-2 m-1 py-1 rounded hover:bg-blue-600"
                     >
                       Seller
                     </button>
                     <button
-                      onClick={() =>{ navigate("/login", { state: { role: "user" } })
-                setShowUserRoles(!showUserRoles)
-                    }}
+                      onClick={() => {
+                        navigate("/login", { state: { role: "user" } })
+                        setShowUserRoles(!showUserRoles)
+                      }}
                       className="w-32 bg-blue-500 text-white m-1 px-2 py-1 rounded hover:bg-blue-600"
                     >
                       User
@@ -87,7 +86,7 @@ function Navbar() {
       {/* Mobile Menu Dropdown */}
       {menuOpen && (
         <div className="md:hidden bg-gray-100 border-t border-gray-300 p-4 space-y-4">
-         
+
           {user ? (
             <>
               <button
@@ -128,14 +127,5 @@ function Navbar() {
   );
 }
 
-const MobileNavLink = ({ to, text, onClick }) => (
-  <NavLink
-    to={to}
-    onClick={onClick}
-    className="flex text-gray-800 text-lg font-medium text-decoration-none items-center justify-center shadow-2xl  hover:text-blue-600 transition"
-  >
-    {text}
-  </NavLink>
-);
 
 export default Navbar;

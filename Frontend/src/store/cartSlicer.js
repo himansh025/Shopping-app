@@ -6,17 +6,18 @@ const cartSlicer = createSlice({
   reducers: {
     addToCart: (state, action) => {
       if (!state.find((item) => item.id === action.payload._id)) {
-        // console.log(action.payload,"item");
-        state.push(action.payload);
-        // console.log(state.wishlist);
-        
+        state.push(action.payload);        
       }
     },
     removeFromCart: (state, action) => {
       return state.filter((item) => item._id !== action.payload);
     },
+    setToCart: (state, action) => {
+      return action.payload;
+    },
+
   },
 });
 
-export const { addToCart, removeFromCart } = cartSlicer.actions;
+export const { addToCart, removeFromCart,setToCart } = cartSlicer.actions;
 export default cartSlicer.reducer;

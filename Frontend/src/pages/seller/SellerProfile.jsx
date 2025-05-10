@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import axiosInstance from "../../Config/apiConfig";
+import BackArrow from "../../Comp/BackArrow";
 
 const SellerProfile = () => {
   const [seller, setSeller] = useState(null);
@@ -9,9 +11,8 @@ const SellerProfile = () => {
     const fetchSeller = async () => {
       try {
         const user=JSON.parse(sessionStorage.getItem("user"))
-        console.log(user) 
-        // const response = await fetch("https://api.example.com/seller-profile");
-        // const data = await response.json();
+const res= await axiosInstance.get('/seller/profile')
+ 
         setSeller(user);
       } catch (error) {
         console.error("Error fetching seller profile:", error);
@@ -35,8 +36,10 @@ const SellerProfile = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-4">Seller Profile</h2>
+    <div className="max-w-3xl mx-auto p-6  bg-white rounded-lg shadow-md">
+         <BackArrow className="mb-4" size={32} />
+      <h2 className="text-2xl text-center font-semibold mb-4">Seller Profile</h2>
+
 
       {seller && (
         <div className="flex flex-col items-center space-y-4">

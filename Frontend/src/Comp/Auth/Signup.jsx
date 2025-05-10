@@ -3,31 +3,44 @@ import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, User } from "lucide-react";
 import axiosInstance from "../../Config/apiConfig";
-
+// import { ToastContext } from "../../App.jsx";
+// import { useContext } from "react";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 const Signup = () => {
   const { register, handleSubmit, formState: { errors, dirtyFields } } = useForm();
   const location = useLocation();
   const navigate = useNavigate();
   const { role } = location.state || { role: "user" };
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const user= useSelector((state)=>state.auth);
+const dispatch= useDispatch();
 
   const handleSignup =async (data) => {
-    console.log("Signup Data:", data);
+    setIsLoading(true);
+    try {
+      // console.log("Signup Data:", data);
     let res;
-    if(role=="user"){
+    if(role==="user"){
       res = await axiosInstance.post("/user/signup",data)
-    }else if(role=="user")
-    {
+    }else if(role==="seller"){
       res = await axiosInstance.post("/seller/signup",data)
     }else{
       res = await axiosInstance.post("/user/signup",data)
     }
 
-    if(res){
-      console.log("signup data",res.data)
-      navigate("/verify-otp")
-    }else{
-      // console.log(errors) 
+    if(res && res.data){
+      // console.log("signup data",res.data)
+      navigate("/verify-otp", { state: { email: data.email,
+        role:role
+       } })
+    }
+  }
+    catch(error){
+      error("invalid credentials")
+    }finally {
+      setIsLoading(false);
     }
     // Add your signup logic here
   };

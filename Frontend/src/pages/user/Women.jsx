@@ -12,7 +12,7 @@ const navigate= useNavigate()
 
   // Filter women's products
   const womenProducts = items?.filter((p) => p.attributes.type === "Women") || [];
-  console.log(womenProducts)
+  // console.log(womenProducts)
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">

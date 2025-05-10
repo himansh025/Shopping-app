@@ -10,7 +10,7 @@ async function displayRazorpay() {
         t.json()
     )
 
-    console.log(data)
+    // console.log(data)
 
     const options = {
         key: __DEV__ ? 'rzp_test_uGoq5ABJztRAhk' : 'PRODUCTION_KEY',
