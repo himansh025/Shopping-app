@@ -1,11 +1,9 @@
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import AddProducts from "../../Comp/seller/AddProducts";
 import EditProducts from "../../Comp/seller/EditProducts";
 import ProductCard from "../../Comp/seller/ProductCard";
 import axiosInstance from "../../Config/apiConfig";
-import { Toast } from "react-bootstrap";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -21,13 +19,10 @@ const Dashboard = () => {
    if(!searchActive) fetchProducts();
   }, []);
 
-    const token = sessionStorage.getItem("token")
 
   const fetchProducts = async () => {
     try {
-      const response = await  axiosInstance.get(`/products/seller/all`,{params:{}},{
-          headers: { Authorization: `Bearer ${token}` }      
-      });
+      const response = await  axiosInstance.get(`/products/seller/all`,{params:{}});
       const data = await response.data;
       setProducts(data?.products || []);
     } catch (error) {
@@ -39,9 +34,7 @@ const Dashboard = () => {
 
   const handleDelete = async (productId) => {
     try {
-      await axiosInstance.delete(`/products/delete/${productId}`,{
-          headers: { Authorization: `Bearer ${token}` }      
-      });
+      await axiosInstance.delete(`/products/delete/${productId}`);
       setProducts(products.filter((product) => product._id !== productId));
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -55,9 +48,7 @@ const Dashboard = () => {
 
   const handleEdit = async(productId) => {
      try {
-      const res= await axiosInstance.delete(`/products/update/${productId}`,{
-          headers: { Authorization: `Bearer ${token}` }      
-      });
+      const res= await axiosInstance.delete(`/products/update/${productId}`);
       if(res)setProducts(products.filter((product) => product._id !== productId));
       
     } catch (error) {
@@ -77,7 +68,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-6xl mt-30 mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold mb-4">
         Your Products ({displayProducts.length})
       </h2>

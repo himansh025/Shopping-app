@@ -1,48 +1,59 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, User } from "lucide-react";
 import axiosInstance from "../../Config/apiConfig";
-// import { ToastContext } from "../../App.jsx";
-// import { useContext } from "react";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const Signup = () => {
-  const { register, handleSubmit, formState: { errors, dirtyFields } } = useForm();
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors, dirtyFields, isSubmitting } 
+  } = useForm();
+  
   const location = useLocation();
   const navigate = useNavigate();
   const { role } = location.state || { role: "user" };
+  
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const user= useSelector((state)=>state.auth);
-const dispatch= useDispatch();
 
-  const handleSignup =async (data) => {
+  const handleSignup = async (data) => {
     setIsLoading(true);
     try {
-      // console.log("Signup Data:", data);
-    let res;
-    if(role==="user"){
-      res = await axiosInstance.post("/user/signup",data)
-    }else if(role==="seller"){
-      res = await axiosInstance.post("/seller/signup",data)
-    }else{
-      res = await axiosInstance.post("/user/signup",data)
-    }
-
-    if(res && res.data){
-      // console.log("signup data",res.data)
-      navigate("/verify-otp", { state: { email: data.email,
-        role:role
-       } })
-    }
-  }
-    catch(error){
-      error("invalid credentials")
-    }finally {
+      // Determine API endpoint based on role
+      const endpoint = role === "seller" ? "/seller/signup" : "/user/signup";
+      
+      // Make API request
+      const res = await axiosInstance.post(endpoint, data);
+      
+      if (res && res.data) {
+        // Show success message
+        toast.success(res.data.message || "Registration successful! Verify your email.");
+        
+        // Navigate to OTP verification page with email and role
+        setTimeout(() => {
+          navigate("/verify-otp", {
+            state: {
+              email: data.email,
+              role: role
+            }
+          });
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("Signup Error:", err);
+      
+      // Show error message
+      toast.error(
+        err.response?.data?.error || 
+        "Registration failed. Please try again."
+      );
+    } finally {
       setIsLoading(false);
     }
-    // Add your signup logic here
   };
 
   return (
@@ -60,7 +71,14 @@ const dispatch= useDispatch();
                 <User size={18} className="text-gray-400" />
               </div>
               <input
-                {...register("username", { required: "Username is required" })}
+                {...register("username", { 
+                  required: "Username is required",
+                  minLength: { value: 3, message: "Username must be at least 3 characters" },
+                  pattern: {
+                    value: /^[a-zA-Z0-9_]+$/,
+                    message: "Username can only contain letters, numbers, and underscores"
+                  }
+                })}
                 type="text"
                 className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 placeholder="Enter your username"
@@ -73,6 +91,32 @@ const dispatch= useDispatch();
               )}
             </div>
             {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>}
+          </div>
+
+          {/* Full Name Field */}
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User size={18} className="text-gray-400" />
+              </div>
+              <input
+                {...register("fullname", { 
+                  required: "Full name is required",
+                  minLength: { value: 2, message: "Full name must be at least 2 characters" }
+                })}
+                type="text"
+                className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                placeholder="Enter your full name"
+              />
+              {dirtyFields.fullname && !errors.fullname && (
+                <CheckCircle size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+              )}
+              {errors.fullname && (
+                <AlertCircle size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500" />
+              )}
+            </div>
+            {errors.fullname && <p className="text-red-500 text-sm mt-1">{errors.fullname.message}</p>}
           </div>
 
           {/* Email Field */}
@@ -140,12 +184,47 @@ const dispatch= useDispatch();
             )}
           </div>
 
+          {/* Optional Phone Field */}
+          {/* <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number <span className="text-gray-400 text-xs">(Optional)</span>
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                </svg>
+              </div>
+              <input
+                {...register("phone", { 
+                  pattern: {
+                    value: /^[0-9]{10,15}$/,
+                    message: "Please enter a valid phone number"
+                  }
+                })}
+                type="tel"
+                className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                placeholder="Enter your phone number"
+              />
+              {dirtyFields.phone && !errors.phone && (
+                <CheckCircle size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+              )}
+              {errors.phone && (
+                <AlertCircle size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500" />
+              )}
+            </div>
+            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
+          </div> */}
+
           {/* Submit Button */}
           <button 
             type="submit" 
-            className="w-full py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-200 font-medium mt-6"
+            disabled={isLoading}
+            className={`w-full py-2.5 text-white ${
+              isLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+            } rounded-lg focus:ring-4 focus:ring-blue-300 transition duration-200 font-medium mt-6`}
           >
-            Create Account
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
           
           {/* Account Options */}
@@ -167,6 +246,7 @@ const dispatch= useDispatch();
           </div>
         </form>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

@@ -25,7 +25,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createContext, useState } from 'react';
 import { useEffect } from 'react';
 import { loadAllProducts, setProducts } from './store/productsSlicer'
-import { VerifyOtp } from './Comp/VertifyOtp';
+import  VerifyOtp  from './Comp/VerifyOtp';
 import { setWishlist } from './store/wishlistSlice';
 import { setToCart } from './store/cartSlicer';
 export const ToastContext = createContext();
@@ -35,24 +35,19 @@ function App() {
   const dispatch = useDispatch()
   const { user, status } = useSelector((state) => state.auth)
   // console.log(user)
-  const token = sessionStorage.getItem("token")
 
   const fetchWishlist = async () => {
     try {
-      const res = await axiosInstance.get('/user/user-wishlist', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axiosInstance.get('/user/user-wishlist');
       dispatch(setWishlist(res.data.wishlist));
     } catch (error) {
-      // console.log("Error fetching wishlist", error);
+      console.log("Error fetching wishlist", error);
     }
   };
 
   const fetchCartlist = async () => {
     try {
-      const res = await axiosInstance.get('/user/user-cart', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axiosInstance.get('/user/user-cart');
       dispatch(setToCart(res.data.cart));
     } catch (error) {
       console.log("Error fetching cart", error);
@@ -104,7 +99,7 @@ dispatch(loadAllProducts(response.data.products));
 
 
             {user?.role == "seller" && (
-              <>
+              < >
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/profile" element={<SellerProfile />} />
                 <Route path="/add" element={<AddProducts />} />

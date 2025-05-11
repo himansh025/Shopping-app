@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
 import {login} from '../../store/authSlicer.js'
-import { useSelector,useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { ToastContext } from "../../App.jsx";
 import { useContext } from "react";
 import axiosInstance from "../../Config/apiConfig.js";
@@ -16,20 +16,13 @@ const Login = () => {
   const { role } = location.state || { role: "user" };
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const user= useSelector((state)=>state.auth);
 const dispatch= useDispatch();
 
-// console.log("user",user)
 const handleLogin = async (data) => {
   setIsLoading(true);
   try {
-    // console.log("Login Data:", data);
     let res;
-    
-    if (role === "user") {
-      res = await axiosInstance.post("/user/login",data)
-
-    }else if(role === "seller") {
+    if(role == "seller") {
       res = await axiosInstance.post("/seller/login",data)
     }
      else {
@@ -38,33 +31,21 @@ const handleLogin = async (data) => {
     
     if (res && res.data) {
       success('Login successful!');
-      // console.log(res.data);
-      
+
       const token = res.data.token;
       const userData = res.data.user;
       
-      // Store token in localStorage
       sessionStorage.setItem("token",token)
-     
       sessionStorage.setItem("user", JSON.stringify(userData))
       
-      // console.log("User data being dispatched:", userData);
-      
-      // Dispatch login action with the correct payload structure
       dispatch(login({ user: userData }));
       if(res.data?.isVerified){
-        // console.log("g")
         navigate("/dashboard")
       } 
-      // navigate("/dashboard")
-
       navigate("/")
-
     }
-  } catch (error) {
-    // console.error("Login failed:", error);
-    error("invalid credentials")
-    // error('Login failed. Please check your credentials.');
+  } catch (err) {
+    error(err.response.data.message)
   } finally {
     setIsLoading(false);
   }

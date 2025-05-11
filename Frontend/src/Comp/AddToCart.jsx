@@ -6,9 +6,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToWishlist, removeFromWishlist } from "../store/wishlistSlice";
 import { addToCart, removeFromCart } from "../store/cartSlicer";
 import axiosInstance from "../Config/apiConfig";
+import BackArrow from "./BackArrow";
 const AddToCart = () => {
   const [cart, setCart] = useState(null);
-  // const [Add,SetAdd] =useState[null];
   const [wishList, setWishList] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -18,12 +18,7 @@ const AddToCart = () => {
   const wishlistSelector = useSelector((state) => state.wishlist);
   const item = items?.find((item) => item._id === id);
   const cartdata = useSelector((state) => state.cart)
-  // console.log(cartdata.length)
-
-
   let already = cartdata.find((item) => item._id == id)
-  // console.log("al", already);
-
 
   useEffect(() => {
     if (item) {
@@ -32,22 +27,14 @@ const AddToCart = () => {
     }
   }, [id, item, wishlistSelector]);
 
-  const token= sessionStorage.getItem("token")
-
   const toggleWishlist = async() => {
     if (!cart) return;
     if(status && user  ){
     if (wishList) {
-      const res = await axiosInstance.put(`/products/wishlist/${cart._id}`,{
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      // console.log(res.data.wishlist, "updated wishlist from backend");
+      const res = await axiosInstance.put(`/products/wishlist/${cart._id}`);
       dispatch(removeFromWishlist(cart._id));
     } else {
-      const res = await axiosInstance.put(`/products/wishlist/${cart._id}`,{
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      // console.log(res.data.wishlist, "updated wishlist from backend");
+      const res = await axiosInstance.put(`/products/wishlist/${cart._id}`);
       dispatch(addToWishlist(cart));
     }
     setWishList(!wishList);}
@@ -56,15 +43,11 @@ const AddToCart = () => {
     }
   };
 
-
 const handleAddToCart = async (id, item) => {
   if(status && user){
   try {
-    const res = await axiosInstance.post(`/products/productCart/${id}`, {}, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const res = await axiosInstance.post(`/products/productCart/${id}`, {});
     dispatch(addToCart(item));
-    // console.log(res.data.message);
   } catch (err) {
     console.error("Add to cart failed:", err.response?.data?.message || err.message);
   }}
@@ -76,9 +59,7 @@ const handleAddToCart = async (id, item) => {
 const handleRemoveFromCart = async (id) => {
   if(status && user){
   try {
-    const res = await axiosInstance.delete(`/products/productCart/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const res = await axiosInstance.delete(`/products/productCart/${id}`);
     dispatch(removeFromCart(id));
     // console.log(res.data.message);
   } catch (err) {
@@ -89,7 +70,6 @@ const handleRemoveFromCart = async (id) => {
   }
 };
 
-
   if (!cart) {
     return (
       <div className="flex justify-center items-center h-64 w-full">
@@ -99,13 +79,15 @@ const handleRemoveFromCart = async (id) => {
   }
 
   return (
-    <div className="flex flex-wrap justify-center gap-6 p-4">
+    <div className="flex flex-wrap justify-center gap-6 p-2">
       {/* Single Product Display */}
+
       <div className="w-full max-w-2xl p-6 bg-white shadow-lg rounded-lg mt-10 border border-gray-200">
+            <BackArrow className="mb-4" size={32} />
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-bold text-2xl text-gray-800">My Cart</h2>
-          <button onClick={toggleWishlist} className="text-2xl">
-            {wishList ? <IoHeart className="text-red-500" /> : <CiHeart className="text-gray-500" />}
+          <button onClick={toggleWishlist} className="text-3xl">
+            {wishList ? <IoHeart className="text-red-500 w-8 h-8" /> : <CiHeart className="text-gray-500 w-8 h-8" />}
           </button>
         </div>
         <div className="flex flex-col items-center">
@@ -118,24 +100,24 @@ const handleRemoveFromCart = async (id) => {
           <p className="text-lg text-blue-600 mt-2">Price: ₹{cart?.price}</p>
         </div>
 
-        <div className="flex justify-center gap-4 mt-5">
+        <div className="flex justify-center gap-1   mt-2">
           {!already && (
             <button
               onClick={() => handleAddToCart(cart._id, cart)}
-              className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="bg-blue-600 text-white px-1 py-1 md:px-4 md:py-4 rounded-2xl hover:bg-blue-700 transition"
             >
               Add Item
             </button>
           )}
           <button
             onClick={() => handleRemoveFromCart(cart._id)}
-            className="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600 transition"
+            className="bg-red-500 text-white px-1 py-1 md:px-4 md:py-4 rounded-2xl hover:bg-red-600 transition"
           >
             Remove
           </button>
           <button
             onClick={() => navigate(`/placedOrder/${cart._id}`)}
-            className="bg-yellow-500 text-white px-5 py-2 rounded-lg hover:bg-yellow-600 transition"
+            className="bg-yellow-500 text-white px-1 py-1 md:px-4 md:py-4 rounded-2xl hover:bg-yellow-600 transition"
           >
             Place Order
           </button>
@@ -170,8 +152,6 @@ const handleRemoveFromCart = async (id) => {
         )}
       </div>
     </div>
-
-
   );
 };
 

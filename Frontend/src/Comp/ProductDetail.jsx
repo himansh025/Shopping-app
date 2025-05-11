@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToWishlist, removeFromWishlist } from "../store/wishlistSlice";
 import Card from '../Comp/Card'
 import axiosInstance from "../Config/apiConfig";
+import BackArrow from "./BackArrow";
 const ProductDetail = () => {
   const navigate= useNavigate()
   const dispatch = useDispatch();
@@ -30,22 +31,18 @@ const ProductDetail = () => {
     }
   
     try {
-      const token = sessionStorage.getItem("token");
   
-      const config = {
-        headers: { Authorization: `Bearer ${token}` },
-      };
   
       if (wishList) {
         // REMOVE FROM WISHLIST
-        const res = await axiosInstance.put(`/products/wishlist/${id}`, {}, config);
+        const res = await axiosInstance.put(`/products/wishlist/${id}`);
         // console.log("Removed from wishlist:", res.data.wishlist);
   
         dispatch(removeFromWishlist(product._id));
         setWishList(false);
       } else {
         // ADD TO WISHLIST
-        const res = await axiosInstance.put(`/products/wishlist/${id}`, {}, config);
+        const res = await axiosInstance.put(`/products/wishlist/${id}`);
         // console.log("Added to wishlist:", res.data.wishlist);
   
         setWishList(true);
@@ -67,6 +64,7 @@ const ProductDetail = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      <BackArrow className="mb-4" size={32} />
       <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl">
         <div className="md:flex">
           {/* Product Image Section */}

@@ -47,11 +47,11 @@ function HomePage({ data }) {
 
           <AllCategories />
 
-          <section className="w-max mx-auto py-12">
+          <section className="w-full mx-auto py-12">
             <h2 className="text-2xl font-bold text-gray-800 text-center">
               Featured Products
             </h2>
-            <div className="mt-6 overflow-hidden">
+            <div className="mt-6 w-full overflow-hidden">
               <Card items={data} />
             </div>
           </section>
@@ -68,7 +68,7 @@ function HomePage({ data }) {
       )}
 
       <footer className="bg-gray-900 text-white text-center py-4 mt-10">
-        <p>© 2025 YourShop. All Rights Reserved.</p>
+        <p>© 2025 MyShop. All Rights Reserved.</p>
       </footer>
     </div>
   );

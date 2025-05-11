@@ -6,16 +6,11 @@ import BackArrow from './BackArrow';
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const navigate = useNavigate()
-  const token = sessionStorage.getItem("token")
   const {user}= useSelector((state)=>state.auth)
 
   const getallOrders = async () => {
     try {
-      const res = await axiosInstance.get("/orderDetail/allOrders", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const res = await axiosInstance.get("/orderDetail/allOrders")
       if (res.data) {
         // console.log("data", res.data.orders[0]);
         setOrders(res?.data?.orders);
@@ -27,11 +22,7 @@ const Orders = () => {
 
   const getuserOrders = async () => {
     try {
-      const res = await axiosInstance.get("/orderDetail/userOrders", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const res = await axiosInstance.get("/orderDetail/userOrders")
       if (res.data) {
         // console.log("data", res.data?.orders);
 

@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "../Config/apiConfig";
 import { toast } from "react-toastify";
+import BackArrow from "./BackArrow";
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
 
 const PlaceOrder = () => {
@@ -138,6 +139,8 @@ const PlaceOrder = () => {
   return (
     <div className=" w-full flex flex-col lg:flex-row justify-center items-start gap-8 p-6 bg-gray-50">
       {/* Product Image Container */}
+            <BackArrow className="mb-4" size={32} />
+      
       <div className=" lg:w-1/3 hidden md:flex w-full  sticky  top-6">
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="relative">

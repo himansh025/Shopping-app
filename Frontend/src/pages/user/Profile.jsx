@@ -17,13 +17,10 @@ function Profile() {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
-  const token = sessionStorage.getItem("token");
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axiosInstance.get(`/user/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axiosInstance.get(`/user/profile`);
       setOrderData(response.data.order);
       setUserData(response?.data?.user);
       setProducts(response?.data?.products);

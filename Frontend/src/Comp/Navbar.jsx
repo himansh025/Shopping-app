@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/authSlicer.js";
 import { FaUser } from "react-icons/fa6";
 import SearchBar from "./SearchBar.jsx";
+import axiosInstance from "../Config/apiConfig.js";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,9 +13,12 @@ function Navbar() {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  const handleLogout = () => {
+  const handleLogout =async () => {
+console.log(user)
+    let endpoint =  user?.role ==="user"? "user":"seller"
+   await axiosInstance.post(`/${endpoint}/logout`)
     dispatch(logout());
-    navigate("/login");
+    navigate("/");
   };
 
   const toggleUserRoles = () => setShowUserRoles(!showUserRoles);
@@ -24,7 +28,7 @@ function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex text-decoration-none items-center">
-            <span className="text-sm md:text-xl font-bold  text-gray-800">ShopEase</span>
+            <span className="text-sm md:text-xl font-bold  text-gray-800">MyShop</span>
           </Link>
       
             <div className=" w-fit md:w-full max-w-md">

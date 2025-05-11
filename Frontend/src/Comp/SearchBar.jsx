@@ -9,8 +9,6 @@ function SearchBar() {
   const [showSearch, setshowSearch] = useState(false)
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth)
-        // console.log("role", user.role)
-  const token = sessionStorage.getItem("token")
   const handleSearch = async () => {
     if (query.trim() === "") {
       dispatch(clearSearch());
@@ -18,14 +16,12 @@ function SearchBar() {
     }
     let res;
     try {
-      if (user?.role == "user") {
-         res = await axiosInstance.get("/products/all", {
-          params: { name: query }
-        });
+      if (user?.role == "seller") {
+  
+      res = await axiosInstance.get("/products/seller/all", { params: { name: query } });
       }else{
-       res = await axiosInstance.get("/products/seller/all", { params: { name: query } },
-        {
-          headers: { Authorization: `Bearer ${token}` }
+           res = await axiosInstance.get("/products/all", {
+          params: { name: query }
         });
       }
       // console.log("res", res)

@@ -8,7 +8,7 @@ function Layout() {
   return (
 <div>
  
-<div  className=' mb-16'>
+<div  className=' '>
     <Navbar/>
     {user && user?.role=="seller"&&(
       <>
@@ -16,7 +16,9 @@ function Layout() {
       </>
     )}
 </div>
-  <Outlet/>
+<div className=""> {/* Adjust as needed */}
+  <Outlet />
+</div>
   </div>
   )
 }

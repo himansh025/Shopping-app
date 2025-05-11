@@ -41,7 +41,7 @@ function AllCategories() {
       </div>
 
       {/* Categories Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-5 md:px-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2  lg:grid-cols-4 gap-6 px-5 md:px-10">
         {categories.map((category, index) => (
           <div
             key={index}
@@ -50,7 +50,7 @@ function AllCategories() {
             <Link to={`/${cats[index]}`}>
               <img
                 src={category.img}
-                className="h-72 w-full object-cover"
+                className="h-72  w-full object-cover"
                 alt={category.name}
               />
               <div className="p-4 text-center">
