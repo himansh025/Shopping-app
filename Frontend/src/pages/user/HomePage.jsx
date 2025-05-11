@@ -47,7 +47,7 @@ function HomePage({ data }) {
 
           <AllCategories />
 
-          <section className="w-full mx-auto py-12">
+          <section className="w-full  py-12">
             <h2 className="text-2xl font-bold text-gray-800 text-center">
               Featured Products
             </h2>
