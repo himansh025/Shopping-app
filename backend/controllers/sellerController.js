@@ -2,15 +2,16 @@ const Seller = require('../models/SellerModel');
 const bcrypt = require('bcryptjs');
 const otpGenerator = require('otp-generator');
 const {generateToken }= require("../middleware/generateToken.js");
+const sendOtpEmail = require("../utils/sendOtpEmail.js");
 
 
 const signup = async (req, res) => {
   try {
-    const { businessName, email, phoneNumber, password, businessAddress, registrationNumber } = req.body;
+    const { username,fullname, email, password } = req.body;
 
     // Check if seller already exists
     const existingSeller = await Seller.findOne({ 
-      $or: [{ email }, { phoneNumber }] 
+      $or: [{ email }, { username }] 
     });
 
     if (existingSeller) {
@@ -24,20 +25,20 @@ const signup = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Generate OTP
-    const otp = otpGenerator.generate(6, { 
-      upperCaseAlphabets: false, 
-      specialChars: false 
-    });
+const otp = otpGenerator.generate(4, {
+  upperCaseAlphabets: false,
+  lowerCaseAlphabets:false,
+  specialChars: false,
+  alphabets: false, 
+});
+    console.log(otp)
 
     // Create new seller
     const newSeller = new Seller({
-      businessName,
+      username,
+      fullname,
       email,
-      phoneNumber,
       password: hashedPassword,
-      businessAddress,
-      registrationNumber,
       otp: {
         code: otp,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000) // OTP expires in 10 minutes
@@ -46,7 +47,9 @@ const signup = async (req, res) => {
     
     await newSeller.save();
 
-    // TODO: Send OTP to seller's phone/email
+
+await sendOtpEmail({email,fullname,otp})
+
 
     res.status(201).json({
       success: true,
@@ -82,11 +85,14 @@ const verifyOtp = async (req, res) => {
     seller.isVerified = true;
     seller.otp = undefined;
     await seller.save();
-    const token= await generateToken(newSeller._id);
+    console.log(seller)
+    const token= await generateToken(seller._id);
+    console.log(token)
 
     res.status(200).json({
       success: true,
-      token:token,
+      token,
+      user:seller,
       message: 'OTP verified successfully'
     });
   } catch (error) {
@@ -148,22 +154,74 @@ const login = async (req, res) => {
   }
 };
 
+
+// Logout
 const logout = async (req, res) => {
+  await Seller.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        token: null
+       }
+    }
+  )
+  const options = {
+    httpOnly: true,
+    secure: true,
+  }
+  res
+    .status(200)
+    .clearCookie("token", options)
+    .json({messfage: "successfull logout"})
+}
+
+const updateProfile = async (req, res) => {
   try {
-    // For JWT, typically logout is handled client-side by removing the token
+    const sellerId = req.user._id; // authenticated user ID
+
+    // Only allow these specific fields to be updated
+    const allowedUpdates = [
+      "businessName",
+      "fullname",
+      "phoneNumber",
+      "registrationNumber",
+      "businessAddress"
+    ];
+
+    const updates = {};
+    for (const key of allowedUpdates) {
+      if (req.body[key] !== undefined) {
+        updates[key] = req.body[key];
+      }
+    }
+
+    const updatedSeller = await Seller.findByIdAndUpdate(sellerId, updates, {
+      new: true,
+      runValidators: true,
+    }).select("-password"); // exclude password if present
+
+    if (!updatedSeller) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller not found",
+      });
+    }
+
     res.status(200).json({
       success: true,
-      message: 'Logout successful'
+      message: "Profile updated successfully",
+      seller: updatedSeller,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error in seller logout',
-      error: error.message
+      message: "Error updating profile",
+      error: error.message,
     });
   }
 };
 
+module.exports = updateProfile;
 
 
 const profile = async (req, res) => {
@@ -205,4 +263,4 @@ const profile = async (req, res) => {
     });
   }
 };
-module.exports={login,logout,verifyOtp,signup,profile }
+module.exports={login,logout,verifyOtp,signup,profile,updateProfile }

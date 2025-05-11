@@ -1,45 +1,83 @@
 const mongoose = require("mongoose");
-// const bcrypt = require("bcryptjs");
-// const jwt = require("jsonwebtoken");
 
-const User = new mongoose.Schema(
+const UserSchema = new mongoose.Schema(
   {
     username: {
       type: String,
       unique: true,
-      required: true,
+      required: [true, "Username is required"],
       lowercase: true,
+      trim: true,
+      index: true
     },
     email: {
       type: String,
       unique: true,
-      required: true,
+      required: [true, "Email is required"],
       lowercase: true,
       trim: true,
+      index: true
     },
     phone: {
       type: Number,
-      required: false,   // Use a default value instead of null
+      required: false, // Make phone optional
     },
     fullname: {
       type: String,
-      required: true,
+      required: [true, "Full name is required"],
       trim: true,
-      index: true,
+      index: true
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: [true, "Password is required"]
     },
     role: {
       type: String,
-      enum: ['user'],
+      enum: ['user', 'admin'],
       default: 'user'
     },
-    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
-    cart: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+    wishlist: [{ 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'Product' 
+    }],
+    cart: [{ 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'Product' 
+    }],
+    isVerified: {
+      type: Boolean,
+      default: true // Since we verify with OTP before creating
+    },
+    profileImage: {
+      type: String,
+      default: null
+    },
+    lastLogin: {
+      type: Date,
+      default: null
+    }
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", User);
+// Virtual for user's full name
+UserSchema.virtual('name').get(function() {
+  return this.fullname;
+});
+
+// Method to check if user has admin rights
+UserSchema.methods.isAdmin = function() {
+  return this.role === 'admin';
+};
+
+// Don't return password and __v in toJSON
+UserSchema.set('toJSON', {
+  transform: function(doc, ret) {
+    delete ret.password;
+    delete ret.__v;
+    return ret;
+  }
+});
+
+module.exports = mongoose.model("User", UserSchema);

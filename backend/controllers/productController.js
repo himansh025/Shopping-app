@@ -211,9 +211,23 @@ const updateProduct = async (req, res) => {
       attributes,
       seller 
     } = req.body;
-    
+
+    const { productId } = req.params;
+
+    console.log("Received attributes:", attributes);
+
+    // Ensure attributes is parsed correctly if it's passed as a string
+    let parsedAttributes
+    if (attributes) {
+      try {
+        parsedAttributes = JSON.parse(attributes);  // Parse stringified attributes if passed as a string
+      } catch (err) {
+        return res.status(400).json({ success: false, message: 'Invalid attributes JSON' });
+      }
+    }
+
     // Find the product
-    let product = await Product.findById(req.params.id);
+    let product = await Product.findById(productId);
     
     if (!product) {
       return res.status(404).json({
@@ -221,7 +235,7 @@ const updateProduct = async (req, res) => {
         message: 'Product not found'
       });
     }
-    
+
     // Update image files if provided
     let imageUrls = [...product.images]; // Start with existing images
     
@@ -244,7 +258,7 @@ const updateProduct = async (req, res) => {
         }
       }
     }
-    
+
     // Build update object
     const updateData = {
       name: name || product.name,
@@ -254,7 +268,7 @@ const updateProduct = async (req, res) => {
       stock: stock || product.stock,
       brand: brand || product.brand,
       images: imageUrls,
-      attributes: attributes || product.attributes
+      attributes: parsedAttributes
     };
     
     // Update seller info if provided
@@ -266,10 +280,10 @@ const updateProduct = async (req, res) => {
         contact: seller.contact || product.seller.contact
       };
     }
-    
+
     // Update the product
     product = await Product.findByIdAndUpdate(
-      req.params.id,
+      productId,
       updateData,
       { new: true, runValidators: true }
     );
@@ -287,6 +301,7 @@ const updateProduct = async (req, res) => {
     });
   }
 };
+
 
 // Delete product
 const deleteProduct = async (req, res) => {

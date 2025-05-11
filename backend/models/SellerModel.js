@@ -1,10 +1,17 @@
 const mongoose = require('mongoose');
 
-const Seller = new mongoose.Schema({
+const SellerSchema = new mongoose.Schema({
   businessName: {
     type: String,
-    required: true,
     trim: true
+  },
+    username: {
+    type: String,
+    required:true
+  },
+  fullname: {
+    type: String,
+    required:true
   },
   email: {
     type: String,
@@ -15,7 +22,6 @@ const Seller = new mongoose.Schema({
   },
   phoneNumber: {
     type: String,
-    required: true,
     unique: true
   },
   password: {
@@ -23,12 +29,12 @@ const Seller = new mongoose.Schema({
     required: true
   },
   businessAddress: {
-    type: String,
-    required: true
+    type: String
   },
   registrationNumber: {
     type: String,
-    unique: true
+    unique: true,
+    sparse: true // handles uniqueness when value is missing
   },
   isVerified: {
     type: Boolean,
@@ -49,4 +55,4 @@ const Seller = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Seller', Seller);
+module.exports = mongoose.model('Seller', SellerSchema);

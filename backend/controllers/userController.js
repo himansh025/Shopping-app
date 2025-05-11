@@ -2,117 +2,156 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/UserModel.js");
 const Order= require("../models/OrderModel.js")
 const { generateToken} = require("../middleware/generateToken.js");
-const nodemailer = require("nodemailer");
-const dotenv =require('dotenv')
-// const bcrypt =require('bcrypt')
-dotenv.config({
-  path: './.env',
-});
-
+const otpGenerator = require('otp-generator');
+const sendOtpEmail = require("../utils/sendOtpEmail.js");
 
 const tempUserStore = {};
-// Function to generate OTP
-const generateOTP = (length) => {
-  const digits = "0123456789";
-  let otp = "";
-  for (let i = 0; i < length; i++) {
-    otp += digits[Math.floor(Math.random() * digits.length)];
-  }
-  return otp;
-}
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
-
-// Signup
+// Signup controller
 const signup = async (req, res) => {
   try {
-    const { fullname ,username, email, password, phone } = req.body;
+    const { username, fullname, email, password } = req.body;
+    
+    // Validate required fields
+    if (!username || !fullname || !email || !password) {
+      return res.status(400).json({ 
+        error: "Username, full name, email, and password are required" 
+      });
+    }
 
     // Check if user exists
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ 
+      $or: [{ email }, { username }] 
+    });
     
-    if (userExists) return res.status(400).json({ error: "User already exists!" });
-
-    const otp = generateOTP(4);
-
-    tempUserStore[email] = { username,fullname, email, password, otp, phone };
-
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: email,
-      subject: `Hello! ${fullname}, Please Verify Your OTP`,
-      html: `<strong>Your OTP code for Signup  is: ${otp}</strong>`,
-    };
-    
-    try {
-      const data = await transporter.sendMail(mailOptions);
-      res.status(200).json((200, email, "OTP sent successfully"));
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  } catch (error) {
-    res.status(500).json({ error });
-  }
-}
-
-
-
-const verifyOtp = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-    const storedUser = tempUserStore[email];
-
-    if (!storedUser) {
-      return res.status(400).json({ error: "No OTP request found for this email" });
-    }
-    if (storedUser.otp !== otp) {
-      return res.status(400).json({ error: "Invalid OTP" });
+    if (userExists) {
+      if (userExists.email === email) {
+        return res.status(400).json({ error: "Email already in use" });
+      } else {
+        return res.status(400).json({ error: "Username already taken" });
+      }
     }
 
-    const { fullname, password, phone,username } = storedUser;
+    const otp = otpGenerator.generate(4, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets:false,
+      specialChars: false,
+      alphabets: false, 
+    });
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ username,fullname, email, phone, password: hashedPassword });
+    console.log(otp)
 
-if (!newUser.phone) {
-  return res.status(400).json({ error: "Phone number is required" });
-}
-
-    await newUser.save();
-    const token = generateToken(newUser._id);
-
-    
-    delete tempUserStore[email];
-    const options = {
-      httpOnly: true,
-      secure: true,
+    // Store user data with OTP
+    tempUserStore[email] = { 
+      username,
+      fullname, 
+      email, 
+      password, 
+      otp, 
+      createdAt: new Date()
     };
 
-    res
-      .status(201)
-      .cookie(options)
-      .json({
-        message: "OTP verified successfully",
-        user: {
-          token,
-          user: newUser,
-        },
-      });
+    // Set OTP expiration (15 minutes)
+    setTimeout(() => {
+      if (tempUserStore[email]) {
+        delete tempUserStore[email];
+      }
+    }, 10 * 60 * 1000);
+
+    // Prepare email content
+await sendOtpEmail({ email, fullname, otp });
+
+    // Respond with success
+    res.status(200).json({ 
+      success: true,
+      message: "OTP sent successfully to your email" 
+    });
+    
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Signup error:", error);
+    res.status(500).json({ 
+      error: "Server error during signup process",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
+// Verify OTP controller
+const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    
+    // Check if email and OTP are provided
+    if (!email || !otp) {
+      return res.status(400).json({ 
+        error: "Email and OTP are required" 
+      });
+    }
+
+    // Get stored user data
+    const storedUser = tempUserStore[email];
+    
+    // Check if there's pending OTP verification for this email
+    if (!storedUser) {
+      return res.status(400).json({ 
+        error: "No pending verification found for this email or OTP expired" 
+      });
+    }
+
+    // Check if OTP matches
+    if (storedUser.otp !== otp) {
+      return res.status(400).json({ 
+        error: "Invalid OTP" 
+      });
+    }
+
+    // Extract user data from temporary store
+    const { username, fullname, password } = storedUser;
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create user in database
+    const newUser = new User({
+      username,
+      fullname,
+      email,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    // Generate JWT token
+    const token = generateToken(newUser._id);
+
+    // Clean up temporary storage
+    delete tempUserStore[email];
+
+    // Send successful response
+    res.status(201).json({
+      success: true,
+      message: "Account verified successfully",
+      user: {
+        token,
+        user: {
+          _id: newUser._id,
+          username: newUser.username,
+          fullname: newUser.fullname,
+          email: newUser.email,
+          role: newUser.role
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    res.status(500).json({ 
+      error: "Server error during verification process",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
+  }
+};
 // Login
 const login = async (req, res) => {
   try {
@@ -151,7 +190,7 @@ const logout = async (req, res) => {
     {
       $set: {
         token: null
-      }
+       }
     }
   )
   const options = {
@@ -224,4 +263,5 @@ const userCart=  async (req, res) => {
     res.status(500).json({ message: "Something went wrong", error });
   }
 };
+
 module.exports = { signup, verifyOtp, login, logout,userprofile,userwishlist,userCart };
