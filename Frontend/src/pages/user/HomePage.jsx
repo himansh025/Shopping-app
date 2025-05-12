@@ -51,7 +51,7 @@ function HomePage({ data }) {
             <h2 className="text-2xl font-bold text-gray-800 text-center">
               Featured Products
             </h2>
-            <div className="mt-6 w-full overflow-hidden">
+            <div className="mt-6 w-full  overflow-hidden">
               <Card items={data} />
             </div>
           </section>

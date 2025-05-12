@@ -22,7 +22,7 @@ const handleitem= (item)=>{
 }
 
   return (
-    <div className="w-full  grid mx-auto  overflow-hidden sm:mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:mx-auto  lg:grid-cols-4 gap-6 ">
+    <div className="w-max md:w-full md:flex md:justify-around  grid mx-auto  overflow-hidden  sm:mx-auto grid-cols-1 sm:grid-cols-2 md:flex-row md:flex-wrap lg:mx-auto  lg:grid-cols-3 gap-6 ">
           {(pureitem.length>0? pureitem : items ).map((item,index) => (
         <div key={index} className=" p-3 bg-white rounded-lg shadow-md overflow-hidden transition transform hover:scale-105 hover:shadow-lg h-fit w-[300px] flex flex-col">
           <img
