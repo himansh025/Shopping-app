@@ -12,6 +12,7 @@ app.use(cors({ credentials: true, origin: "*"
 app.use(cookieParser());
 connectDB();
 
+app.use("/api/v1/auth", require("./routes/googleRoute.js"));
 app.use("/api/v1/user", require("./routes/userRoute.js"));
 app.use("/api/v1/seller", require("./routes/sellerRoute.js"));
 app.use("/api/v1/products", require("./routes/productRoute.js"));

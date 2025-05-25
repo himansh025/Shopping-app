@@ -123,7 +123,7 @@ const getAllProducts = async (req, res) => {
 
     // Fetch products that match the filter
     const products = await Product.find(filter);
-
+    console.log(products)
     res.status(200).json({
       success: true,
       count: products.length,
@@ -142,6 +142,7 @@ const getAllProducts = async (req, res) => {
 const getAllSellerProd = async (req, res) => {
   try {
     const { name } = req.query;
+console.log(req.user.id )
 
     // Always filter by seller.sellerId
     const filter = { "seller.sellerId": req.user.id };

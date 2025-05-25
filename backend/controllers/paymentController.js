@@ -1,12 +1,11 @@
-require("dotenv").config();
 const Razorpay = require("razorpay");
 const Order = require("../models/OrderModel");
 const Product = require("../models/ProductModel");
 const crypto = require("crypto");
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || rzp_test_0QxwTt83YVaeeL,
-  key_secret: process.env.RAZORPAY_KEY_SECRET || CkY6Xwi4gDa1vxeUV0TipTRr,
+  key_id: process.env.RAZORPAY_KEY_ID ,
+  key_secret: process.env.RAZORPAY_KEY_SECRET 
 });
 
 
@@ -44,7 +43,7 @@ const createOrder = async (req, res) => {
   
       // Create COD Order
       const order = new Order({
-          userId: values.userId || "67c9a7a9e24544a4e93f8ace", 
+          userId: values.userId, 
           products: [   // ✅ Wrap inside an array
               {
                   productId: productDetails.id,  // ✅ Ensure ObjectId
@@ -57,9 +56,9 @@ const createOrder = async (req, res) => {
               }
           ],
           totalAmount: product.price * product.quantity,
-          name: values.name || "null",
+          name: values.name ,
           email: values.email,
-          phone: values.contact || "344433333",
+          phone: values.contact ,
           address: values.address,
           city: values.city,
           state: values.state,
@@ -109,7 +108,7 @@ if (!prod) {
 
 // Create the order and include the full product details inside `products`
 const order = new Order({
-  userId: values.userId || "67c9a7a9e24544a4e93f8ace",
+  userId: values.userId,
   products: [{
     productId: prod._id,
     quantity: productDetails.quantity,
@@ -120,9 +119,9 @@ const order = new Order({
     images: prod.images
   }],
   totalAmount: prod.price * productDetails.quantity,
-  name: values.name || "null",
+  name: values.name ,
   email: values.email,
-  phone: values.contact || "344433333",
+  phone: values.contact ,
   address: values.address,
   city: values.city,
   state: values.state,
