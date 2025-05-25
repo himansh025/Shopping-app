@@ -17,24 +17,13 @@ function Forget() {
     try {
       console.log(`Reset Password Email Sent To ${role}:`, data.email);
       // API endpoint would differ based on role
-      const endpoint = role === "user" ? "/api/user/reset-password" : "/api/seller/reset-password";
-      
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // On success
-      setEmailSent(true);
-      
-      // Navigate to OTP verification after short delay
-      setTimeout(() => {
-        navigate("/verify-otp", { 
-          state: { 
-            email: data.email,
-            role: role 
-          } 
-        });
-      }, 2000);
-      
+      const endpoint = role === "user" ? "/user/forget" : "/seller/forget";
+        const res= await axiosInstance.post(endpoint,{data})
+        if(res)
+        {
+          console.log(res.data)
+        }
+        navigate("/login")
     } catch (error) {
       console.error("Failed to send reset email:", error);
     } finally {
@@ -45,7 +34,7 @@ function Forget() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-3">Forgot Password</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-3">Forgot  Password</h2>
         <p className="text-sm text-gray-500 text-center mb-6">
           {emailSent 
             ? `Recovery email sent! Check your inbox.` 

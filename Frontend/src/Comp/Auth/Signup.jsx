@@ -5,6 +5,7 @@ import { Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, User } from "lucide-
 import axiosInstance from "../../Config/apiConfig";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GoogleLoginButton from "../GoogleLoginButton";
 
 const Signup = () => {
   const { 
@@ -57,12 +58,12 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br mt-10 from-blue-50 to-indigo-100">
       <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
         <p className="text-center text-gray-500 mb-8">Sign up as {role || "user"}</p>
         
-        <form onSubmit={handleSubmit(handleSignup)} className="space-y-5">
+        <form onSubmit={handleSubmit(handleSignup)} className="space-y-2 ">
           {/* Username Field */}
           <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
@@ -184,49 +185,20 @@ const Signup = () => {
             )}
           </div>
 
-          {/* Optional Phone Field */}
-          {/* <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number <span className="text-gray-400 text-xs">(Optional)</span>
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                </svg>
-              </div>
-              <input
-                {...register("phone", { 
-                  pattern: {
-                    value: /^[0-9]{10,15}$/,
-                    message: "Please enter a valid phone number"
-                  }
-                })}
-                type="tel"
-                className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                placeholder="Enter your phone number"
-              />
-              {dirtyFields.phone && !errors.phone && (
-                <CheckCircle size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
-              )}
-              {errors.phone && (
-                <AlertCircle size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500" />
-              )}
-            </div>
-            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
-          </div> */}
-
+      
           {/* Submit Button */}
           <button 
             type="submit" 
             disabled={isLoading}
-            className={`w-full py-2.5 text-white ${
+            className={`w-full   py-2.5 text-white ${
               isLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
             } rounded-lg focus:ring-4 focus:ring-blue-300 transition duration-200 font-medium mt-6`}
           >
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
           
+
+        
           {/* Account Options */}
           <div className="flex justify-between text-sm pt-2">
             <button
@@ -236,13 +208,7 @@ const Signup = () => {
             >
               Already have an account?
             </button>
-            <button
-              type="button"
-              onClick={() => navigate("/forget", { state: { role: role } })}
-              className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-            >
-              Forgot Password?
-            </button>
+       
           </div>
         </form>
       </div>

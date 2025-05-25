@@ -57,7 +57,7 @@ function App() {
 
   const fetchProducts = async () => {
     const response = await axiosInstance.get("/products/all",{params:{}})
-    // console.log("d",response?.data?.products);
+    // console.log("d",response?.data);
     setData(response?.data.products)
     if (response.data) {
 dispatch(loadAllProducts(response.data.products));

@@ -26,7 +26,7 @@ function ProductCarousel() {
 
 
   return (
-    <div className="w-full h-[500px]">
+    <div className="w-full mt-20 h-[500px]">
       <Carousel fade>
         {products.map((product, index) => (
           <Carousel.Item key={index}>

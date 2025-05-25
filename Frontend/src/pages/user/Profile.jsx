@@ -71,7 +71,7 @@ function Profile() {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 relative">
+    <div className="max-w-6xl mx-auto px-4 mt-16 py-8 relative">
       <div className="flex items-center mb-6">
       <BackArrow className="mb-4" size={32} />
         <h1 className="text-2xl font-bold">My Account</h1>

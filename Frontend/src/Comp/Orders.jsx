@@ -43,7 +43,7 @@ const Orders = () => {
 
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl md:mt-30 mt-40  mx-auto p-6">
        <BackArrow className="mb-4" size={32} />
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">My Orders</h1>
@@ -51,7 +51,7 @@ const Orders = () => {
       </div>
 
       {orders?.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg text-center">
+        <div className="flex flex-col items-center  justify-center py-12 bg-gray-50 rounded-lg text-center">
           <svg className="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
           </svg>

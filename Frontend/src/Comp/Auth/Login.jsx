@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { ToastContext } from "../../App.jsx";
 import { useContext } from "react";
 import axiosInstance from "../../Config/apiConfig.js";
+import GoogleLoginButton from '../GoogleLoginButton.jsx';
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors, dirtyFields } } = useForm();
@@ -121,6 +122,10 @@ const handleLogin = async (data) => {
           >
             {isLoading ? "Logging in..." : "Login"}
           </button>
+
+          <p className="text-center my-3">or</p>
+
+          <GoogleLoginButton role={role} />
           
           {/* Account Options */}
           <div className="flex justify-between text-sm pt-2">
@@ -131,13 +136,13 @@ const handleLogin = async (data) => {
             >
               Create an Account
             </button>
-            <button
+            {/* <button
               type="button"
               onClick={() => navigate("/forget", { state: { role: role } })}
               className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
             >
               Forgot Password?
-            </button>
+            </button> */}
           </div>
         </form>
       </div>

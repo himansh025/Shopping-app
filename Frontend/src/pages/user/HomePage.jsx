@@ -19,7 +19,7 @@ function HomePage({ data }) {
 
       {!searchActive ? (
         <>
-          <ProductCrousel />
+          <ProductCrousel className="mt-10" />
 
           <section className="bg-white py-16 text-center">
             <h1 className="text-4xl font-bold text-gray-800">
@@ -57,7 +57,7 @@ function HomePage({ data }) {
           </section>
         </>
       ) : (
-        <section className="w-max mx-auto py-12">
+        <section className="w-auto mx-auto mt-3 overflow-hidden  py-12">
           <h2 className="text-2xl font-bold text-gray-800 text-center">
             Search Results
           </h2>
