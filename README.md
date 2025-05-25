@@ -28,7 +28,7 @@ testing password : SecurePass123
 
 ## 🔐 Authentication & Authorization
 
-- JWT-based authentication
+- JWT-based authentication & OAuth
 - Role-based routes and permissions
 - Protected routes for both sellers and users
 - Conditional rendering based on role
