@@ -6,13 +6,9 @@ const connectDB = require("./config/db.js");
 
 const app = express();
 
-app.use(cors({
-  origin: "*"
-}));
-
 const allowedOrigins = ['https://shopping-frontend-gamma.vercel.app'];
 app.use(cors({
-  origin: allowedOrigins,   // ✅ safer than "*"
+  origin:"*",   // ✅ safer than "*"
 }));
 
 
