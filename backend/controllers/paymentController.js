@@ -12,7 +12,7 @@ const razorpay = new Razorpay({
 const createOrder = async (req, res) => {
   try {
     const { values, productDetails } = req.body;
-
+console.log(values,productDetails)
     // Validate input
     if (!values || !productDetails) {
       return res.status(400).json({
@@ -43,7 +43,7 @@ const createOrder = async (req, res) => {
   
       // Create COD Order
       const order = new Order({
-          userId: values.userId, 
+          userId: values.id, 
           products: [   // ✅ Wrap inside an array
               {
                   productId: productDetails.id,  // ✅ Ensure ObjectId
@@ -58,7 +58,7 @@ const createOrder = async (req, res) => {
           totalAmount: product.price * product.quantity,
           name: values.name ,
           email: values.email,
-          phone: values.contact ,
+          phone: values.phone,
           address: values.address,
           city: values.city,
           state: values.state,
@@ -90,7 +90,7 @@ const createOrder = async (req, res) => {
         currency: "INR",
         receipt: uniqueOrderId, // Use generated orderId
         notes: {
-          userId: values.userId,
+          userId: values.id,
           products: JSON.stringify(productDetails)
         }
       };
@@ -108,7 +108,7 @@ if (!prod) {
 
 // Create the order and include the full product details inside `products`
 const order = new Order({
-  userId: values.userId,
+  userId: values.id,
   products: [{
     productId: prod._id,
     quantity: productDetails.quantity,
@@ -121,7 +121,7 @@ const order = new Order({
   totalAmount: prod.price * productDetails.quantity,
   name: values.name ,
   email: values.email,
-  phone: values.contact ,
+  phone: values.phone,
   address: values.address,
   city: values.city,
   state: values.state,

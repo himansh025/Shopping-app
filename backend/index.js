@@ -5,12 +5,17 @@ const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db.js");
 
 const app = express();
-const allowedOrigins = ['https://shopping-frontend-gamma.vercel.app'];
 
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
+  origin: "*"
 }));
+
+const allowedOrigins = ['https://shopping-frontend-gamma.vercel.app' || "http://localhost:5173"];
+
+app.use(cors({
+  origin: allowedOrigins,   // ✅ safer than "*"
+}));
+
 
 app.use(express.json());
 app.use(cookieParser());
