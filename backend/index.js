@@ -10,8 +10,7 @@ app.use(cors({
   origin: "*"
 }));
 
-const allowedOrigins = ['https://shopping-frontend-gamma.vercel.app' || "http://localhost:5173"];
-
+const allowedOrigins = ['https://shopping-frontend-gamma.vercel.app'];
 app.use(cors({
   origin: allowedOrigins,   // ✅ safer than "*"
 }));
