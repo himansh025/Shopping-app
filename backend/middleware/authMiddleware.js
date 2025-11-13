@@ -10,10 +10,10 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
-    // console.log("decoded",decoded)
-
+    console.log("decoded",decoded)
+    
     const { userId } = decoded;
-
+    
     let user = await User.findById(userId);
     // console.log(user)
     let role = 'user';

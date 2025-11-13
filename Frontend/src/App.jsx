@@ -28,6 +28,7 @@ import { loadAllProducts, setProducts } from './store/productsSlicer'
 import  VerifyOtp  from './Comp/VerifyOtp';
 import { setWishlist } from './store/wishlistSlice';
 import { setToCart } from './store/cartSlicer';
+import Chatbot from './Comp/Chatbot';
 export const ToastContext = createContext();
 
 function App() {
@@ -86,6 +87,7 @@ dispatch(loadAllProducts(response.data.products));
       <Router>
         <Routes>
           <Route path="/" element={<Layout />}>
+           
             {user?.role != "seller" &&
               <Route index element={<HomePage data={Data} />} />}
             <Route path="/login" element={<Login />} />
@@ -119,9 +121,11 @@ dispatch(loadAllProducts(response.data.products));
             )}
 
           </Route>
+        
         </Routes>
-
+<Chatbot/>
         {/* Toast Container */}
+        </Router>
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -133,7 +137,7 @@ dispatch(loadAllProducts(response.data.products));
           draggable
           pauseOnHover
         />
-      </Router>
+       {/* {user?.role === "user" && <Chatbot />} */}
     </ToastContext.Provider>
   );
 }
