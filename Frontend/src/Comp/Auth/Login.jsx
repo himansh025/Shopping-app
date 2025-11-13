@@ -8,6 +8,7 @@ import { ToastContext } from "../../App.jsx";
 import { useContext } from "react";
 import axiosInstance from "../../Config/apiConfig.js";
 import GoogleLoginButton from '../GoogleLoginButton.jsx';
+import { toast } from "react-toastify";
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors, dirtyFields } } = useForm();
@@ -46,6 +47,7 @@ const handleLogin = async (data) => {
       navigate("/")
     }
   } catch (err) {
+    error(err.error)
     error(err.response.data.message)
   } finally {
     setIsLoading(false);
