@@ -70,7 +70,6 @@ const PlaceOrder = () => {
         resetForm();
       } else {
         toast.success("Order placed successfully!")
-        // alert("Order placed successfully!");
         resetForm();
       }
     }
@@ -139,8 +138,8 @@ const PlaceOrder = () => {
   return (
     <div className=" w-full flex flex-col lg:flex-row justify-center items-start gap-8 p-6 bg-gray-50">
       {/* Product Image Container */}
-            <BackArrow className="mb-4" size={32} />
-      
+      <BackArrow className="mb-4" size={32} />
+
       <div className=" lg:w-1/3 hidden md:flex w-full  sticky  top-6">
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="relative">

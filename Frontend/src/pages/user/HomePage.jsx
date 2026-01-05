@@ -6,14 +6,18 @@ import Card from "../../Comp/Card";
 import AllCategories from "../../Comp/AllCategories";
 import NavLinks from "../../Comp/NavLinks";
 
+import Loader from "../../Comp/Loader";
+
 function HomePage({ data }) {
-  const { items, searchActive } = useSelector((state) => state.products);
-  const {user} = useSelector((state) => state.auth);
+  const { items, searchActive, status } = useSelector((state) => state.products);
+  const { user } = useSelector((state) => state.auth);
+
+  if (!items?.length && status === "loading") return <Loader />;
 
   return (
     <div className="min-h-screen w-full bg-gray-100">
-      
-      {user &&(
+
+      {user && (
         <NavLinks />
       )}
 

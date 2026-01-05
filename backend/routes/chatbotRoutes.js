@@ -5,8 +5,8 @@ const {
   healthCheck
 } = require("../controllers/chatbotController.js");
 
-const { authMiddleware} = require("../middleware/authMiddleware.js");
-router.post("/chat", authMiddleware, shopChatBotHandler);
+const { authMiddleware, optionalAuthMiddleware } = require("../middleware/authMiddleware.js");
+router.post("/chat", optionalAuthMiddleware, shopChatBotHandler);
 router.get("/health", healthCheck);
 
 module.exports = router;

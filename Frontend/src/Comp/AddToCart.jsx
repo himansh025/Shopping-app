@@ -27,48 +27,64 @@ const AddToCart = () => {
     }
   }, [id, item, wishlistSelector]);
 
-  const toggleWishlist = async() => {
+  const toggleWishlist = async () => {
     if (!cart) return;
-    if(status && user  ){
-    if (wishList) {
-      const res = await axiosInstance.put(`/products/wishlist/${cart._id}`);
-      dispatch(removeFromWishlist(cart._id));
-    } else {
-      const res = await axiosInstance.put(`/products/wishlist/${cart._id}`);
-      dispatch(addToWishlist(cart));
+
+    // Guest Logic
+    if (!user) {
+      if (wishList) {
+        dispatch(removeFromWishlist(cart._id));
+      } else {
+        dispatch(addToWishlist(cart));
+      }
+      setWishList(!wishList);
+      return;
     }
-    setWishList(!wishList);}
-    else{
-      navigate('/login')
+
+    if (status && user) {
+      if (wishList) {
+        const res = await axiosInstance.put(`/products/wishlist/${cart._id}`);
+        dispatch(removeFromWishlist(cart._id));
+      } else {
+        const res = await axiosInstance.put(`/products/wishlist/${cart._id}`);
+        dispatch(addToWishlist(cart));
+      }
+      setWishList(!wishList);
+    }
+    // Removed else navigate login
+  };
+
+  const handleAddToCart = async (id, item) => {
+    // Guest Logic
+    if (!user) {
+      dispatch(addToCart(item));
+      return;
+    }
+
+    if (status && user) {
+      try {
+        const res = await axiosInstance.post(`/products/productCart/${id}`, {});
+        dispatch(addToCart(item));
+      } catch (err) {
+        console.error("Add to cart failed:", err.response?.data?.message || err.message);
+      }
     }
   };
 
-const handleAddToCart = async (id, item) => {
-  if(status && user){
-  try {
-    const res = await axiosInstance.post(`/products/productCart/${id}`, {});
-    dispatch(addToCart(item));
-  } catch (err) {
-    console.error("Add to cart failed:", err.response?.data?.message || err.message);
-  }}
-  else{
-    navigate('/login')
-  }
-};
-
-const handleRemoveFromCart = async (id) => {
-  if(status && user){
-  try {
-    const res = await axiosInstance.delete(`/products/productCart/${id}`);
-    dispatch(removeFromCart(id));
-    // console.log(res.data.message);
-  } catch (err) {
-    console.error("Remove from cart failed:", err.response?.data?.message || err.message);
-  }}
-  else{
-    navigate('/login')
-  }
-};
+  const handleRemoveFromCart = async (id) => {
+    if (status && user) {
+      try {
+        const res = await axiosInstance.delete(`/products/productCart/${id}`);
+        dispatch(removeFromCart(id));
+        // console.log(res.data.message);
+      } catch (err) {
+        console.error("Remove from cart failed:", err.response?.data?.message || err.message);
+      }
+    }
+    else {
+      navigate('/login')
+    }
+  };
 
   if (!cart) {
     return (
@@ -83,7 +99,7 @@ const handleRemoveFromCart = async (id) => {
       {/* Single Product Display */}
 
       <div className="w-full max-w-2xl p-6 bg-white shadow-lg rounded-lg mt-10 border border-gray-200">
-            <BackArrow className="mb-4" size={32} />
+        <BackArrow className="mb-4" size={32} />
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-bold text-2xl text-gray-800">My Cart</h2>
           <button onClick={toggleWishlist} className="text-3xl">

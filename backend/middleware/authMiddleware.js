@@ -10,10 +10,10 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
-    console.log("decoded",decoded)
-    
+    console.log("decoded", decoded)
+
     const { userId } = decoded;
-    
+
     let user = await User.findById(userId);
     // console.log(user)
     let role = 'user';
@@ -64,4 +64,45 @@ const authorizeseller = (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, authorizeseller, authorizeuser };
+const optionalAuthMiddleware = async (req, res, next) => {
+  const token = req.header("Authorization");
+
+  if (!token) {
+    return next(); // Proceed without user context for guests
+  }
+
+  try {
+    const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
+    const { userId } = decoded;
+
+    let user = await User.findById(userId);
+    let role = 'user';
+
+    if (!user) {
+      user = await Seller.findById(userId);
+      role = 'seller';
+    }
+
+    if (user) {
+      // Select only safe fields
+      if (role === 'user') {
+        user = await User.findById(userId).select('username email fullname phone');
+      } else if (role === 'seller') {
+        user = await Seller.findById(userId).select('-password -otp');
+      }
+
+      req.user = {
+        ...user.toObject(),
+        id: user._id.toString(),
+        role
+      };
+    }
+    next();
+  } catch (err) {
+    console.error("Optional JWT verification error:", err);
+    // Even if token is invalid, allow as guest
+    next();
+  }
+};
+
+module.exports = { authMiddleware, authorizeseller, authorizeuser, optionalAuthMiddleware };

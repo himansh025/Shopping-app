@@ -43,7 +43,7 @@ console.log(values,productDetails)
   
       // Create COD Order
       const order = new Order({
-          userId: values.id, 
+          userId: req.user._id, 
           products: [   // ✅ Wrap inside an array
               {
                   productId: productDetails.id,  // ✅ Ensure ObjectId
@@ -108,7 +108,7 @@ if (!prod) {
 
 // Create the order and include the full product details inside `products`
 const order = new Order({
-  userId: values.id,
+  userId: req.user._id,
   products: [{
     productId: prod._id,
     quantity: productDetails.quantity,

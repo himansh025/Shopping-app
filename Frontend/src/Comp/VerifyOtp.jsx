@@ -52,18 +52,18 @@ const VerifyOtp = () => {
                 otp 
             });
             
-            if (res && res.data) {
+            if (res ) {
                 toast.success('OTP verified successfully!');
                 
                 // Extract token and user data
-                const token = res.data?.token;
+                const token = res.data?.token || res?.data?.user?.token;
                 
                 if (token) {
                     // Save token to localStorage
                     sessionStorage.setItem('token', token);
                     
                     // Update Redux state
-                    dispatch(login({ user: res.data.user }));
+                    dispatch(login({ user: res.data?.user ||res?.data?.seller }));
                     
                     // Redirect to homepage
                     setTimeout(() => {

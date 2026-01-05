@@ -8,7 +8,7 @@ import Card from '../Comp/Card'
 import axiosInstance from "../Config/apiConfig";
 import BackArrow from "./BackArrow";
 const ProductDetail = () => {
-  const navigate= useNavigate()
+  const navigate = useNavigate()
   const dispatch = useDispatch();
   const { id } = useParams();
   const [wishList, setWishList] = useState(false);
@@ -19,6 +19,7 @@ const ProductDetail = () => {
   // console.log("is user",user)
   const item = items?.find((item) => item._id === id);
   useEffect(() => {
+    window.scrollTo(0, 0); // Scroll to top when component mounts or id changes
     if (item) {
       setProduct(item);
       setWishList(wishlistSelector.some(wishItem => wishItem._id === id));
@@ -29,22 +30,22 @@ const ProductDetail = () => {
     if (!user) {
       return navigate("/login");
     }
-  
+
     try {
-  
-  
+
+
       if (wishList) {
         // REMOVE FROM WISHLIST
         const res = await axiosInstance.put(`/products/wishlist/${id}`);
         // console.log("Removed from wishlist:", res.data.wishlist);
-  
+
         dispatch(removeFromWishlist(product._id));
         setWishList(false);
       } else {
         // ADD TO WISHLIST
         const res = await axiosInstance.put(`/products/wishlist/${id}`);
         // console.log("Added to wishlist:", res.data.wishlist);
-  
+
         setWishList(true);
         dispatch(addToWishlist(product));
       }
@@ -52,7 +53,7 @@ const ProductDetail = () => {
       // console.log("Wishlist toggle error:", error);
     }
   };
-  
+
 
   if (!product) {
     return (
@@ -75,7 +76,7 @@ const ProductDetail = () => {
                 alt={product.name}
                 className="w-full h-[550px] object-cover transition-transform duration-200 hover:scale-103"
               />
-              <button 
+              <button
                 onClick={toggleWishlist}
                 className="absolute top-4 right-4 p-1  rounded-3xl shadow-md transition-all duration-100 hover:bg-gray-200  "
               >
@@ -92,39 +93,39 @@ const ProductDetail = () => {
           <div className="md:w-1/2 p-6 md:p-8">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">{product.name}</h1>
             <p className="text-xl font-semibold text-blue-600 mb-4">₹{product.price}</p>
-            
+
             <div className="space-y-2 mb-6">
               <div className="flex justify-between border-b pb-1">
                 <span className="text-gray-600">Category</span>
                 <span className="font-medium">{product.category}</span>
               </div>
-              
+
               {product?.attributes?.size && (
                 <div className="flex justify-between border-b pb-1">
                   <span className="text-gray-600">Size</span>
                   <span className="font-medium">{product.attributes.size.join(", ")}</span>
                 </div>
               )}
-              
+
               {product?.attributes?.type && (
                 <div className="flex justify-between border-b pb-1">
                   <span className="text-gray-600">Type</span>
                   <span className="font-medium">{product.attributes.type}</span>
                 </div>
               )}
-              
+
               <div className="flex justify-between border-b pb-1">
                 <span className="text-gray-600">Brand</span>
                 <span className="font-medium">{product.brand}</span>
               </div>
-              
+
               {product?.attributes?.material && (
                 <div className="flex justify-between border-b pb-1">
                   <span className="text-gray-600">Material</span>
                   <span className="font-medium">{product.attributes.material}</span>
                 </div>
               )}
-              
+
               <div className="flex justify-between border-b pb-1">
                 <span className="text-gray-600">Stock</span>
                 <span className={`font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -132,26 +133,32 @@ const ProductDetail = () => {
                 </span>
               </div>
             </div>
-            
+
             <p className="text-gray-700 mb-6">{product.description}</p>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
-                onClick={() =>{user && user.role==="user"? navigate(`/addToCart/${product._id}`):navigate("/login")}}
+                onClick={() => { user && user.role === "user" ? navigate(`/addToCart/${product._id}`) : navigate("/login") }}
                 className="bg-blue-500 py-3 text-white rounded-md shadow-sm hover:bg-blue-600 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none"
               >
                 Add to Cart
               </button>
-              
+
               <button
-                onClick={() =>{user && user.role==="user"? navigate("/wishlist") : navigate("/login")}}
+                onClick={() => {
+                  if (!user || user.role === "user") {
+                    navigate("/wishlist")
+                  } else {
+                    navigate("/login")
+                  }
+                }}
                 className="bg-gray-100 py-3 text-gray-800 rounded-md shadow-sm hover:bg-gray-200 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none"
               >
                 View Wishlist
               </button>
-              
+
               <button
-                onClick={() => {user && user?.role== "user"? navigate(`/placedOrder/${product._id}`):navigate("/login")}}
+                onClick={() => { user && user?.role == "user" ? navigate(`/placedOrder/${product._id}`) : navigate("/login") }}
                 className="bg-green-500 py-3 text-white rounded-md shadow-sm hover:bg-green-600 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none"
               >
                 Buy Now
@@ -160,13 +167,13 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="mt-12 mb-6">
         <h3 className="text-2xl font-bold text-center relative pb-3 mb-8">
           Similar Products
           <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-blue-500"></span>
         </h3>
-        <Card items ={items} remove={item} />
+        <Card items={items} remove={item} />
       </div>
     </div>
   );

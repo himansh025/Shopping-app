@@ -1,4 +1,5 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Groq = require("groq-sdk");
 const Product = require("../models/ProductModel");
 const Order = require("../models/OrderModel");
 const Cart = require("../models/CartModel");
@@ -9,7 +10,18 @@ const OpenAI = require("openai");
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+let groq;
+try {
+    if (process.env.GROQ_API_KEY) {
+        groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    } else {
+        console.warn("GROQ_API_KEY is missing. Chatbot will fallback to other models.");
+    }
+} catch (error) {
+    console.error("Failed to initialize Groq client:", error);
+}
 
 const INTENTS = {
     user: {
@@ -19,6 +31,10 @@ const INTENTS = {
         wishlist: ["wishlist", "favorites", "saved", "liked"],
         payment_help: ["payment", "refund", "cod", "transaction", "failed"],
         account_info: ["profile", "account", "address", "details", "login"]
+    },
+    guest: { // ✅ New intent group for guests
+        product_search: ["product", "find", "search", "available", "buy", "shop", "item"],
+        general_help: ["help", "contact", "support", "hi", "hello"]
     },
     seller: {
         product_management: ["add", "update", "delete", "product", "stock", "inventory"],
@@ -45,7 +61,23 @@ const classifyIntent = (query, role) => {
 // ✅ Build database context
 const getDatabaseContext = async (intent, userId, role) => {
     const ctx = {};
+    if (!userId && role !== 'guest') return ctx; // Safety check
+
     try {
+        if (role === 'guest') {
+            switch (intent) {
+                case "product_search":
+                    const products = await Product.find({ stock: { $gt: 0 } }).limit(5);
+                    ctx.products = products.map(p => ({
+                        name: p.name,
+                        price: p.price,
+                        category: p.category
+                    }));
+                    break;
+            }
+            return ctx;
+        }
+
         switch (intent) {
             case "order_status":
                 const orders = await Order.find({ userId }).populate("products.productId");
@@ -136,8 +168,8 @@ const getDatabaseContext = async (intent, userId, role) => {
 };
 
 const generateAIResponse = async (query, context, role) => {
-  const systemPrompts = {
-    user: `
+    const systemPrompts = {
+        user: `
 You are ShopEase AI Assistant helping a **customer**.
 You can help with:
 🛒 Orders and tracking
@@ -149,7 +181,15 @@ If user asks unrelated questions, respond:
 "I can only help with ShopEase products, orders, and your account."
 Context: ${JSON.stringify(context)}
 `,
-    seller: `
+        guest: `
+You are ShopEase AI Assistant helping a **visitor**.
+You can help with:
+🎁 Product discovery and search
+ℹ️ General information about ShopEase
+Encourage them to login for checking orders or cart.
+Context: ${JSON.stringify(context)}
+`,
+        seller: `
 You are ShopEase AI Assistant helping a **seller**.
 Assist with:
 📦 Managing products and stock
@@ -158,76 +198,98 @@ If unrelated, reply:
 "I can help only with ShopEase seller dashboard and inventory tasks."
 Context: ${JSON.stringify(context)}
 `,
-    admin: `
+        admin: `
 You are ShopEase AI Assistant helping an **admin**.
 Assist with:
 👥 Managing users
 📊 Viewing analytics and reports
 Context: ${JSON.stringify(context)}
 `,
-  };
+    };
 
-  const prompt = `
+    const prompt = `
 ${systemPrompts[role] || systemPrompts.user}
 User Query: "${query}"
 Generate a short, natural, and relevant response.
 `;
 
-  try {
-    // 🧠 Try Gemini first
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
-    const result = await model.generateContent({
-      contents: [{ parts: [{ text: prompt }] }],
-    });
-
-    const geminiResponse = result?.response?.text?.();
-    if (geminiResponse) {
-      return geminiResponse.trim();
-    }
-
-    throw new Error("Empty Gemini response");
-  } catch (geminiError) {
-    console.error("⚠️ Gemini Error:", geminiError.message);
-
-    // 🪄 Fallback to ChatGPT
     try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini", // Or "gpt-4o" for more power
-        messages: [
-          {
-            role: "system",
-            content:
-              systemPrompts[role] ||
-              systemPrompts.user,
-          },
-          {
-            role: "user",
-            content: query,
-          },
-        ],
-        max_tokens: 200,
-        temperature: 0.7,
-      });
+        // 🚀 Try Groq First
+        if (groq) {
+            console.log("Attempting Groq...");
+            const chatCompletion = await groq.chat.completions.create({
+                messages: [{ role: "user", content: prompt }],
+                model: "groq/compound", // or "llama3-70b-8192" for better quality
+            });
+            const groqResponse = chatCompletion.choices[0]?.message?.content;
+            if (groqResponse) return groqResponse.trim();
+            throw new Error("Empty Groq response");
+        } else {
+            throw new Error("Groq client not initialized");
+        }
 
-      const chatgptResponse = completion.choices[0].message.content;
-      return chatgptResponse.trim();
-    } catch (chatGPTError) {
-      console.error("❌ ChatGPT Fallback Error:", chatGPTError.message);
-      return "I'm having trouble right now. Please try again later.";
+    } catch (groqError) {
+        console.error("⚠️ Groq Error:", groqError.message);
+
+        try {
+            // 🧠 Fallback to Gemini
+            console.log("Fallback to Gemini...");
+            const model = genAI.getGenerativeModel(
+                {
+                    // model: "gemini-1.5-flash"
+                     model: "gemini-2.5-pro"
+                     });
+            const result = await model.generateContent({
+                contents: [{ parts: [{ text: prompt }] }],
+            });
+
+            const geminiResponse = result?.response?.text?.();
+            if (geminiResponse) return geminiResponse.trim();
+
+            throw new Error("Empty Gemini response");
+        } catch (geminiError) {
+            console.error("⚠️ Gemini Error:", geminiError.message);
+
+            // 🪄 Fallback to ChatGPT
+            try {
+                console.log("Fallback to ChatGPT...");
+                const completion = await openai.chat.completions.create({
+                    model: "gpt-4o-mini", // Or "gpt-4o" for more power
+                    messages: [
+                        {
+                            role: "system",
+                            content: systemPrompts[role] || systemPrompts.user,
+                        },
+                        {
+                            role: "user",
+                            content: query,
+                        },
+                    ],
+                    max_tokens: 200,
+                    temperature: 0.7,
+                });
+
+                const chatgptResponse = completion.choices[0].message.content;
+                return chatgptResponse.trim();
+            } catch (chatGPTError) {
+                console.error("❌ ChatGPT Fallback Error:", chatGPTError.message);
+                return "I'm having trouble right now. Please try again later.";
+            }
+        }
     }
-  }
 };
 
 // ✅ Main handler
 exports.shopChatBotHandler = async (req, res) => {
     try {
         const { message } = req.body;
-        const { user } = req;
+        // User might be undefined if guest, so default to guest role
+        const user = req.user || { role: 'guest', _id: null };
 
         if (!message) return res.status(400).json({ error: "Message is required" });
 
         const intent = classifyIntent(message, user.role);
-        console.log("itnent================>", intent);
+        console.log("intent================>", intent);
         const context = await getDatabaseContext(intent, user._id, user.role);
         console.log("context================>", context);
         const aiResponse = await generateAIResponse(message, context, user.role);

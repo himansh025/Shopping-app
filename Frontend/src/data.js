@@ -1,4 +1,4 @@
-const  quickResponses = {
+const quickResponses = {
   user: [
     "Show me my orders",
     "Track my delivery",
@@ -36,7 +36,13 @@ const  quickResponses = {
     "See system health",
     "Show flagged activities",
     "Manage platform settings"
+  ],
+
+  guest: [
+    "Browse products 🛍️",
+    "How does it work? ℹ️",
+    "Contact support 📞"
   ]
 };
 
- export default quickResponses;
+export default quickResponses;

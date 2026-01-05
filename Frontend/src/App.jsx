@@ -24,8 +24,8 @@ import SellerProfile from './pages/seller/SellerProfile'
 import { useDispatch, useSelector } from 'react-redux';
 import { createContext, useState } from 'react';
 import { useEffect } from 'react';
-import { loadAllProducts, setProducts } from './store/productsSlicer'
-import  VerifyOtp  from './Comp/VerifyOtp';
+import { loadAllProducts, setProducts, setLoading } from './store/productsSlicer'
+import VerifyOtp from './Comp/VerifyOtp';
 import { setWishlist } from './store/wishlistSlice';
 import { setToCart } from './store/cartSlicer';
 import Chatbot from './Comp/Chatbot';
@@ -57,22 +57,49 @@ function App() {
   };
 
   const fetchProducts = async () => {
-    const response = await axiosInstance.get("/products/all",{params:{}})
-    // console.log("d",response?.data);
-    setData(response?.data.products)
-    if (response.data) {
-dispatch(loadAllProducts(response.data.products));
+    dispatch(setLoading());
+    try {
+      const response = await axiosInstance.get("/products/all", { params: {} })
+      // console.log("d",response?.data);
+      setData(response?.data.products)
+      if (response.data) {
+        dispatch(loadAllProducts(response.data.products));
+      }
+    } catch (error) {
+      console.error("Failed to fetch products", error);
     }
   };
 
 
   useEffect(() => {
-    if (status && user?.role=="user") {
+    if (user?.role === "user") {
       fetchWishlist();
       fetchCartlist();
+    } else if (!user) {
+      // Load from LocalStorage for guests
+      const savedWishlist = JSON.parse(localStorage.getItem("guestWishlist") || "[]");
+      const savedCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
+      dispatch(setWishlist(savedWishlist));
+      dispatch(setToCart(savedCart));
     }
     fetchProducts()
   }, [user])
+
+  // Sync to LocalStorage for guests
+  const cart = useSelector(state => state.cart);
+  const wishlist = useSelector(state => state.wishlist);
+
+  useEffect(() => {
+    if (!user) {
+      localStorage.setItem("guestCart", JSON.stringify(cart || []));
+    }
+  }, [cart, user]);
+
+  useEffect(() => {
+    if (!user) {
+      localStorage.setItem("guestWishlist", JSON.stringify(wishlist || []));
+    }
+  }, [wishlist, user]);
 
 
   const showToast = {
@@ -87,7 +114,7 @@ dispatch(loadAllProducts(response.data.products));
       <Router>
         <Routes>
           <Route path="/" element={<Layout />}>
-           
+
             {user?.role != "seller" &&
               <Route index element={<HomePage data={Data} />} />}
             <Route path="/login" element={<Login />} />
@@ -121,23 +148,23 @@ dispatch(loadAllProducts(response.data.products));
             )}
 
           </Route>
-        
+
         </Routes>
-<Chatbot/>
+        <Chatbot />
         {/* Toast Container */}
-        </Router>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-       {/* {user?.role === "user" && <Chatbot />} */}
+      </Router>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      {/* {user?.role === "user" && <Chatbot />} */}
     </ToastContext.Provider>
   );
 }

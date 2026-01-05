@@ -5,49 +5,49 @@ const { uploadOnCloudinary } = require('../utils/cloudinary.js');
 // const mongoose = require("mongoose")
 const createProduct = async (req, res) => {
   try {
-    const { 
-      name, 
-      price, 
-      category, 
-      description, 
-      stock, 
-      brand, 
-      attributes, 
-      seller 
+    const {
+      name,
+      price,
+      category,
+      description,
+      stock,
+      brand,
+      attributes,
+      seller
     } = req.body;
 
-    
+
     // Validate required fields
     if (!name || !price || !category || !description || !stock) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Missing required product fields' 
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required product fields'
       });
     }
-    
+
     const attributesString = JSON.parse(attributes);
     const sellerStrrng = JSON.parse(seller);
 
     // Validate seller information
-    if (!seller ) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Complete seller information is required' 
+    if (!seller) {
+      return res.status(400).json({
+        success: false,
+        message: 'Complete seller information is required'
       });
     }
 
     // Validate file uploads
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'At least one image is required' 
+      return res.status(400).json({
+        success: false,
+        message: 'At least one image is required'
       });
     }
 
     if (req.files.length > 5) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Maximum 5 images allowed' 
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum 5 images allowed'
       });
     }
 
@@ -55,7 +55,7 @@ const createProduct = async (req, res) => {
     const imageUrls = [];
     for (const file of req.files) {
       const uploadResponse = await uploadOnCloudinary(file.path);
-      
+
       if (uploadResponse && uploadResponse.url) {
         imageUrls.push(uploadResponse.url);
       } else {
@@ -67,7 +67,7 @@ const createProduct = async (req, res) => {
     }
 
     // Create product with all data
-    const newProduct =await new Product({
+    const newProduct = await new Product({
       name,
       price,
       category,
@@ -77,7 +77,7 @@ const createProduct = async (req, res) => {
       attributes: attributesString || {},
       images: imageUrls,
       seller: {
-        sellerId:sellerStrrng. sellerId,
+        sellerId: sellerStrrng.sellerId,
         name: sellerStrrng.name,
         email: sellerStrrng.email,
         contact: sellerStrrng.contact
@@ -85,26 +85,27 @@ const createProduct = async (req, res) => {
     });
 
     const savedProduct = await newProduct.save();
-    
-    res.status(201).json({ 
-      success: true, 
-      message: 'Product created successfully', 
-      product: savedProduct 
+
+    res.status(201).json({
+      success: true,
+      message: 'Product created successfully',
+      product: savedProduct
     });
   } catch (error) {
     console.error("Error creating product:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to create product', 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create product',
+      error: error.message
     });
   }
 };
 
 // Get all products
+// Get all products
 const getAllProducts = async (req, res) => {
   try {
-    const { name } = req.query;
+    const { name, category } = req.query;
 
     // Build filter object for searching
     let filter = {};
@@ -121,9 +122,14 @@ const getAllProducts = async (req, res) => {
       };
     }
 
+    // Specific category filter
+    if (category) {
+      // Use case-insensitive regex for category to match "Women" or "Women's"
+      filter.category = { $regex: category, $options: 'i' };
+    }
+
     // Fetch products that match the filter
     const products = await Product.find(filter);
-    console.log(products)
     res.status(200).json({
       success: true,
       count: products.length,
@@ -142,11 +148,11 @@ const getAllProducts = async (req, res) => {
 const getAllSellerProd = async (req, res) => {
   try {
     const { name } = req.query;
-console.log(req.user.id )
+    console.log(req.user.id)
 
     // Always filter by seller.sellerId
     const filter = { "seller.sellerId": req.user.id };
-console.log(filter)
+    console.log(filter)
 
     if (name) {
       const searchQuery = { $regex: name, $options: 'i' };
@@ -158,7 +164,7 @@ console.log(filter)
     }
 
     const products = await Product.find(filter);
-console.log(products)
+    console.log(products)
     res.status(200).json({
       success: true,
       count: products.length,
@@ -178,14 +184,14 @@ console.log(products)
 const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    
+
     if (!product) {
       return res.status(404).json({
         success: false,
         message: 'Product not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       product
@@ -202,15 +208,15 @@ const getProductById = async (req, res) => {
 // Update product
 const updateProduct = async (req, res) => {
   try {
-    const { 
-      name, 
-      price, 
-      category, 
-      description, 
-      stock, 
-      brand, 
+    const {
+      name,
+      price,
+      category,
+      description,
+      stock,
+      brand,
       attributes,
-      seller 
+      seller
     } = req.body;
 
     const { productId } = req.params;
@@ -229,7 +235,7 @@ const updateProduct = async (req, res) => {
 
     // Find the product
     let product = await Product.findById(productId);
-    
+
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -239,21 +245,21 @@ const updateProduct = async (req, res) => {
 
     // Update image files if provided
     let imageUrls = [...product.images]; // Start with existing images
-    
+
     if (req.files && req.files.length > 0) {
       // Process new image uploads
       if (req.files.length > 5) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Maximum 5 images allowed' 
+        return res.status(400).json({
+          success: false,
+          message: 'Maximum 5 images allowed'
         });
       }
-      
+
       // Replace with new images
       imageUrls = [];
       for (const file of req.files) {
         const uploadResponse = await uploadOnCloudinary(file.path);
-        
+
         if (uploadResponse && uploadResponse.url) {
           imageUrls.push(uploadResponse.url);
         }
@@ -271,7 +277,7 @@ const updateProduct = async (req, res) => {
       images: imageUrls,
       attributes: parsedAttributes
     };
-    
+
     // Update seller info if provided
     if (seller && Object.keys(seller).length > 0) {
       updateData.seller = {
@@ -288,7 +294,7 @@ const updateProduct = async (req, res) => {
       updateData,
       { new: true, runValidators: true }
     );
-    
+
     res.status(200).json({
       success: true,
       message: 'Product updated successfully',
@@ -308,16 +314,16 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    
+
     if (!product) {
       return res.status(404).json({
         success: false,
         message: 'Product not found'
       });
     }
-    
+
     await Product.findByIdAndDelete(req.params.id);
-    
+
     res.status(200).json({
       success: true,
       message: 'Product deleted successfully'
@@ -335,9 +341,9 @@ const deleteProduct = async (req, res) => {
 const getProductsBySeller = async (req, res) => {
   try {
     const sellerId = req.params.sellerId;
-    
+
     const products = await Product.find({ 'seller.sellerId': sellerId });
-    
+
     res.status(200).json({
       success: true,
       count: products.length,
@@ -353,13 +359,13 @@ const getProductsBySeller = async (req, res) => {
 };
 
 
-const wishlist= async (req, res) => {
-  const userId = req.user.id; 
+const wishlist = async (req, res) => {
+  const userId = req.user.id;
   const id = req.params.id;
 
   try {
     const user = await User.findById(userId);
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

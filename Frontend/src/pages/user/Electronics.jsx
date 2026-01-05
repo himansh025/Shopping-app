@@ -1,22 +1,31 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-// import { fetchProducts } from '../../store/productsSlicer.js';
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../Config/apiConfig";
+import Loader from "../../Comp/Loader";
 
 const Electronics = () => {
-  const dispatch = useDispatch();
-  const { items } = useSelector((state) => state.products); // ✅ Correct path
-const navigate= useNavigate();
-  // console.log(items);
-
+  const [elecProducts, setElecProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    
-   
-  }, [items]);
+    const fetchElecProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get("/products/all?category=Electronics");
+        if (response.data && response.data.products) {
+          setElecProducts(response.data.products);
+        }
+      } catch (error) {
+        console.error("Error fetching electronics products:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchElecProducts();
+  }, []);
 
-  const menProducts = items?.filter((p) => p.attributes.type === "Gadget");
-
+  if (loading) return <Loader />;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -25,11 +34,11 @@ const navigate= useNavigate();
         Discover the latest trends in Electronics Gadget
       </p>
 
-      {menProducts.length === 0 ? (
+      {elecProducts.length === 0 ? (
         <p className="text-gray-500 text-center">No products found</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {menProducts.map((product) => (
+          {elecProducts.map((product) => (
             <div
               key={product._id}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300"
@@ -43,17 +52,17 @@ const navigate= useNavigate();
                 <h3 className="text-lg font-semibold">{product.name}</h3>
                 <p className="text-gray-500 text-sm">{product.category}</p>
                 <p className="text-sm text-gray-700">{product.description}</p>
-                <p className="font-semibold mt-2">${product.price}</p>
+                <p className="font-semibold mt-2">₹{product.price}</p>
                 <p className="text-sm text-gray-600">
                   Brand: {product.brand} | Material: {product.material}
                 </p>
-              
+
                 <p className="text-sm text-gray-600">
                   Seller: {product.seller?.name} ({product.seller?.contact})
                 </p>
-                <button 
-                                onClick={() => navigate(`/addToCart/${product._id}`)}
-                className="mt-3 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-300">
+                <button
+                  onClick={() => navigate(`/addToCart/${product._id}`)}
+                  className="mt-3 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-300">
                   Add to Cart
                 </button>
               </div>
