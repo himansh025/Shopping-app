@@ -25,7 +25,7 @@ const Boy = () => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto mt-10 px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Boys' Collection</h1>
         <p className="text-gray-600">Stylish and comfortable clothing for active boys</p>

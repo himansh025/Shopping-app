@@ -30,7 +30,7 @@ const Women = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 mt-10 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Women's Collection</h1>
         <p className="text-gray-600">Explore our latest women's fashion styles</p>
