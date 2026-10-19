@@ -1,38 +1,21 @@
 import './App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import HomePage from './pages/user/HomePage';
-import { CustomerLayout, SellerLayout, AuthLayout } from './layouts';
-import AddToCart from './Comp/AddToCart';
-import PlaceOrder from './Comp/PlacedOrder';
-import Login from './Comp/Auth/Login';
-import Signup from './Comp/Auth/Signup';
-import Wishlist from './Comp/Wishlist';
-import ProductDetail from './Comp/ProductDetail';
-import Forget from './Comp/Auth/Forget';
-import AddProducts from './Comp/seller/AddProducts';
-import Men from './pages/user/Men';
-import Women from './pages/user/Women';
-import Electronics from './pages/user/Electronics';
-import axiosInstance from './Config/apiConfig';
-import Orders from './Comp/Orders';
-import Dashboard from './pages/seller/Dashboard';
-import Profile from './pages/user/Profile';
-import SellerProfile from './pages/seller/SellerProfile'
+import { AppRoutes } from './routes';
+import axiosInstance from './services/apiClient';
 import { useDispatch, useSelector } from 'react-redux';
 import { createContext, useState, useEffect } from 'react';
-import { loadAllProducts, setLoading } from './store/productsSlicer'
-import VerifyOtp from './Comp/VerifyOtp';
-import { setWishlist } from './store/wishlistSlice';
-import { setToCart } from './store/cartSlicer';
+import { loadAllProducts, setLoading } from './store/slices/productsSlice';
+import { setWishlist } from './store/slices/wishlistSlice';
+import { setToCart } from './store/slices/cartSlice';
+
 export const ToastContext = createContext();
 
 function App() {
-  const [Data, setData] = useState([])
-  const dispatch = useDispatch()
-  const { user, status } = useSelector((state) => state.auth)
-  // console.log(user)
+  const [data, setData] = useState([]);
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
 
   const fetchWishlist = async () => {
     try {
@@ -49,16 +32,14 @@ function App() {
       dispatch(setToCart(res.data.cart));
     } catch (error) {
       console.log("Error fetching cart", error);
-
     }
   };
 
   const fetchProducts = async () => {
     dispatch(setLoading());
     try {
-      const response = await axiosInstance.get("/products/all", { params: {} })
-      // console.log("d",response?.data);
-      setData(response?.data.products)
+      const response = await axiosInstance.get("/products/all", { params: {} });
+      setData(response?.data.products);
       if (response.data) {
         dispatch(loadAllProducts(response.data.products));
       }
@@ -66,7 +47,6 @@ function App() {
       console.error("Failed to fetch products", error);
     }
   };
-
 
   useEffect(() => {
     if (user?.role === "user") {
@@ -79,12 +59,12 @@ function App() {
       dispatch(setWishlist(savedWishlist));
       dispatch(setToCart(savedCart));
     }
-    fetchProducts()
-  }, [user])
+    fetchProducts();
+  }, [user]);
 
   // Sync to LocalStorage for guests
-  const cart = useSelector(state => state.cart);
-  const wishlist = useSelector(state => state.wishlist);
+  const cart = useSelector((state) => state.cart);
+  const wishlist = useSelector((state) => state.wishlist);
 
   useEffect(() => {
     if (!user) {
@@ -98,56 +78,17 @@ function App() {
     }
   }, [wishlist, user]);
 
-
   const showToast = {
     success: (message) => toast.success(message),
     error: (message) => toast.error(message),
     info: (message) => toast.info(message),
-    warning: (message) => toast.warning(message)
+    warning: (message) => toast.warning(message),
   };
 
   return (
     <ToastContext.Provider value={showToast}>
       <Router>
-        <Routes>
-          {/* Seller Workspace Shell */}
-          {user?.role === "seller" ? (
-            <Route element={<SellerLayout />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<SellerProfile />} />
-              <Route path="/add" element={<AddProducts />} />
-              <Route path="/orders" element={<Orders />} />
-            </Route>
-          ) : (
-            /* Customer / Storefront Shell */
-            <Route element={<CustomerLayout />}>
-              <Route path="/" element={<HomePage data={Data} />} />
-              <Route path="/men" element={<Men />} />
-              <Route path="/women" element={<Women />} />
-              <Route path="/electronics" element={<Electronics />} />
-              <Route path="/item-detail/:id" element={<ProductDetail />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/addToCart/:id" element={<AddToCart />} />
-              <Route path="/placedOrder/:id" element={<PlaceOrder />} />
-
-              {user?.role === "user" && (
-                <>
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/profile" element={<Profile />} />
-                </>
-              )}
-            </Route>
-          )}
-
-          {/* Dedicated Authentication Shell */}
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forget" element={<Forget />} />
-            <Route path="/verify-otp" element={<VerifyOtp />} />
-          </Route>
-        </Routes>
+        <AppRoutes user={user} data={data} />
       </Router>
       <ToastContainer
         position="top-right"

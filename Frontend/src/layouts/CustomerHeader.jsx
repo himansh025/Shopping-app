@@ -13,9 +13,9 @@ import {
   Package,
   Store,
 } from 'lucide-react';
-import { logout } from '../store/authSlicer';
-import { clearSearch, setProducts } from '../store/productsSlicer';
-import axiosInstance from '../Config/apiConfig';
+import { logout } from '../store/slices/authSlice';
+import { clearSearch, setProducts } from '../store/slices/productsSlice';
+import axiosInstance from '../services/apiClient';
 import PageContainer from './PageContainer';
 import {
   Dropdown,

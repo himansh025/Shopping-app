@@ -1,0 +1,108 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Mail, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
+import axiosInstance from "../../../services/apiClient";
+
+export function Forget() {
+  const { register, handleSubmit, formState: { errors, dirtyFields } } = useForm();
+  const [isLoading, setIsLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { role } = location.state || { role: "user" };
+
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      const endpoint = role === "user" ? "/user/forget" : "/seller/forget";
+      const res = await axiosInstance.post(endpoint, { data });
+      if (res) {
+        setEmailSent(true);
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Failed to send reset email:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-md p-6 sm:p-8 bg-white rounded-2xl shadow-md border border-slate-200/80">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center text-slate-900 mb-3">Forgot Password</h2>
+      <p className="text-sm text-gray-500 text-center mb-6">
+        {emailSent 
+          ? `Recovery email sent! Check your inbox.` 
+          : `Enter your ${role} email to reset your password.`}
+      </p>
+      
+      {!emailSent ? (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Mail size={18} className="text-gray-400" />
+            </div>
+            <input
+              type="email"
+              {...register("email", { 
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address"
+                }
+              })}
+              placeholder="Enter your email address"
+              className="w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            />
+            {dirtyFields.email && !errors.email && (
+              <CheckCircle size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+            )}
+            {errors.email && (
+              <AlertCircle size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500" />
+            )}
+          </div>
+          {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+          
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:bg-blue-400 disabled:cursor-not-allowed"
+          >
+            {isLoading ? "Sending..." : "Reset Password"}
+            {!isLoading && <ArrowRight size={16} />}
+          </button>
+          
+          <div className="flex justify-between text-sm pt-2">
+            <button
+              type="button"
+              onClick={() => navigate("/login", { state: { role: role } })}
+              className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+            >
+              Back to Login
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/signup", { state: { role: role } })}
+              className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+            >
+              Create an Account
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <CheckCircle size={60} className="text-green-500" />
+          </div>
+          <p className="text-lg font-medium">Email sent successfully!</p>
+          <p className="text-gray-500 mt-2">Check your inbox for instructions.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Forget;

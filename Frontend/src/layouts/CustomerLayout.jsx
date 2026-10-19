@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import CustomerHeader from './CustomerHeader';
 import CustomerFooter from './CustomerFooter';
-import Chatbot from '../Comp/Chatbot';
+import Chatbot from '../features/chatbot';
 
 /**
  * Dedicated Customer / Storefront Layout

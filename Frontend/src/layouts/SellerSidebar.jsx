@@ -10,8 +10,8 @@ import {
   Store,
   X,
 } from 'lucide-react';
-import { logout } from '../store/authSlicer';
-import axiosInstance from '../Config/apiConfig';
+import { logout } from '../store/slices/authSlice';
+import axiosInstance from '../services/apiClient';
 
 export function SellerSidebar({ mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
