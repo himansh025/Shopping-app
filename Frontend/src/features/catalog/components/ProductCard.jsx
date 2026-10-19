@@ -191,13 +191,6 @@ export function ProductCard({ product, className = '' }) {
       {/* Card Content */}
       <div className="p-4 flex-1 flex flex-col justify-between">
         <div>
-          {/* Brand if present */}
-          {product.brand && (
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 truncate">
-              {product.brand}
-            </p>
-          )}
-
           {/* Product Title */}
           <h3
             title={product.name}
