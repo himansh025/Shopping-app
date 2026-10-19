@@ -6,6 +6,7 @@ export { default as Women } from './pages/Women';
 export { default as Electronics } from './pages/Electronics';
 export { default as Girl } from './pages/Girl';
 export { default as Boy } from './pages/Boy';
+export { default as CategoryPage } from './pages/CategoryPage';
 
 // Catalog Components
 export { default as ProductCard } from './components/ProductCard';

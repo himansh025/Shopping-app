@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Routes, Route } from 'react-router-dom';
 import { CustomerLayout, SellerLayout, AuthLayout } from '../layouts';
-import { HomePage, ProductDetail, Men, Women, Electronics } from '../features/catalog';
+import { HomePage, ProductDetail, Men, Women, Electronics, Boy, Girl } from '../features/catalog';
 import { AddToCart } from '../features/cart';
 import { Wishlist } from '../features/wishlist';
 import { PlaceOrder } from '../features/checkout';
@@ -32,6 +32,8 @@ export function AppRoutes({ user, data }) {
           <Route path="/men" element={<Men />} />
           <Route path="/women" element={<Women />} />
           <Route path="/electronics" element={<Electronics />} />
+          <Route path="/boy" element={<Boy />} />
+          <Route path="/girl" element={<Girl />} />
           <Route path="/item-detail/:id" element={<ProductDetail />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/addToCart/:id" element={<AddToCart />} />
