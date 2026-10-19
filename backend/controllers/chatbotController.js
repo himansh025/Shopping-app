@@ -175,13 +175,14 @@ const getDatabaseContext = async (intent, userId, role) => {
 const generateAIResponse = async (query, context, role) => {
     const systemPrompts = {
         user: `
-You are the AI Shopping Assistant for a modern e-commerce storefront.
+You are the official AI Shopping Assistant for "MyShop" (our store brand is strictly MyShop. Never use ShopEase or any other brand name).
 Help customers with:
 🛒 Orders and tracking (direct to /orders)
 💳 Payments and refunds (UPI, Cards, COD supported)
-🎁 Product discovery, sizing, and styling advice
+🎁 Product discovery, sizing, and styling advice across MyShop
 🧺 Shopping Cart and Wishlist
-IMPORTANT FORMATTING RULES:
+IMPORTANT FORMATTING & BRANDING RULES:
+- Our store name is "MyShop". Always refer to the platform as "MyShop".
 - Never output markdown pipe tables (| col | col |) because chat windows are narrow.
 - Always use clean bulleted cards:
   • **Product Name** — ₹Price (Sizes: S, M, L, XL)
@@ -191,12 +192,13 @@ IMPORTANT FORMATTING RULES:
 Context: ${JSON.stringify(context)}
 `,
         guest: `
-You are the AI Shopping Assistant for a modern e-commerce storefront.
+You are the official AI Shopping Assistant for "MyShop" (our store brand is strictly MyShop. Never use ShopEase or any other brand name).
 Help visitors with:
-🎁 Product discovery, recommendations, and department browsing (Men, Women, Electronics)
+🎁 Product discovery, recommendations, and department browsing across MyShop (Men, Women, Electronics)
 ℹ️ General store information, shipping policies, returns, and payment methods
 Encourage visitors to create an account or sign in to track personal orders.
-IMPORTANT FORMATTING RULES:
+IMPORTANT FORMATTING & BRANDING RULES:
+- Our store name is "MyShop". Always refer to the platform as "MyShop".
 - Never output markdown pipe tables (| col | col |) because chat windows are narrow.
 - Always format product listings with clean bullet lists:
   • **Product Name** — ₹Price (Sizes / Highlights)
@@ -206,14 +208,14 @@ IMPORTANT FORMATTING RULES:
 Context: ${JSON.stringify(context)}
 `,
         seller: `
-You are the Merchant Assistant helping a seller on our platform.
+You are the Merchant Assistant helping a seller on the "MyShop" platform (strictly MyShop).
 Assist with:
-📦 Managing catalog products and stock levels
+📦 Managing catalog products and stock levels on MyShop
 📈 Orders, fulfillment, and merchant portal tools
 Context: ${JSON.stringify(context)}
 `,
         admin: `
-You are the Platform Assistant helping an administrator.
+You are the Platform Assistant helping an administrator of "MyShop".
 Assist with managing users, reviewing performance, and platform operations.
 Context: ${JSON.stringify(context)}
 `,
@@ -261,8 +263,8 @@ Generate a short, natural, and relevant response.
 
     // 🪄 2. Intelligent Contextual Rule-Based Fallback
     const q = query.toLowerCase();
-    if (q.includes("how does it work") || q.includes("how it works") || q.includes("work")) {
-        return "Welcome to our store! 🛍️ Here's how it works:\n\n1. **Browse & Discover**: Explore curated Men's, Women's, and Electronics collections.\n2. **Select & Add to Bag**: Pick your preferred size and add to cart.\n3. **Quick Checkout**: Pay online via UPI/Cards or choose Cash on Delivery (COD).\n4. **Express Delivery**: Enjoy fast shipping directly to your doorstep with easy 7-day returns!";
+    if (q.includes("how does it work") || q.includes("how it works") || q.includes("work") || q.includes("what is myshop")) {
+        return "Welcome to **MyShop**! 🛍️ Here's how it works:\n\n1. **Browse & Discover**: Explore curated Men's, Women's, and Electronics collections.\n2. **Select & Add to Bag**: Pick your preferred size and add to cart.\n3. **Quick Checkout**: Pay online via UPI/Cards or choose Cash on Delivery (COD).\n4. **Express Delivery**: Enjoy fast shipping directly to your doorstep with easy 7-day returns!";
     }
     if (q.includes("order") || q.includes("track") || q.includes("delivery")) {
         if (context.orders?.length) {
@@ -271,10 +273,10 @@ Generate a short, natural, and relevant response.
         return "You can check and track all your active and previous orders by navigating to your [Orders page](/orders).";
     }
     if (q.includes("pay") || q.includes("payment") || q.includes("cod") || q.includes("upi")) {
-        return "We support multiple payment methods:\n- **UPI**: Google Pay, PhonePe, Paytm\n- **Online Gateway**: Razorpay (Credit/Debit cards, Net Banking)\n- **Cash on Delivery (COD)** on eligible pincodes!";
+        return "We support multiple payment methods on MyShop:\n- **UPI**: Google Pay, PhonePe, Paytm\n- **Online Gateway**: Razorpay (Credit/Debit cards, Net Banking)\n- **Cash on Delivery (COD)** on eligible pincodes!";
     }
     if (q.includes("return") || q.includes("refund") || q.includes("exchange")) {
-        return "We offer a **7-Day Hassle-Free Return & Exchange** guarantee. If you're not satisfied, you can initiate a doorstep return or exchange right from your order history.";
+        return "MyShop offers a **7-Day Hassle-Free Return & Exchange** guarantee. If you're not satisfied, you can initiate a doorstep return or exchange right from your order history.";
     }
     if (q.includes("cart") || q.includes("bag")) {
         return "You can view and manage your selected items anytime by opening your [Shopping Bag](/cart).";
@@ -283,7 +285,7 @@ Generate a short, natural, and relevant response.
         return "You can view all your saved items anytime on your [Wishlist page](/wishlist).";
     }
 
-    return "Hello! I am your AI Shopping Assistant. You can ask me to help you find products, track active orders, explain return policies, or check sizing details. What would you like to explore today?";
+    return "Hello! I am your **MyShop AI Shopping Assistant**. You can ask me to help you find products, track active orders, explain return policies, or check sizing details across MyShop. What would you like to explore today?";
 };
 
 // ✅ Main handler
@@ -311,5 +313,5 @@ exports.shopChatBotHandler = async (req, res) => {
 
 // ✅ Health check
 exports.healthCheck = (req, res) => {
-    res.json({ status: "OK", message: "ShopEase Chatbot is online 🚀" });
+    res.json({ status: "OK", message: "MyShop Chatbot is online 🚀" });
 };

@@ -18,7 +18,7 @@ const INITIAL_MESSAGE = {
   id: 'welcome',
   type: 'bot',
   content:
-    "Hello! 👋 I'm your **AI Shopping Assistant**.\n\nI can help you discover products, track active orders, explain return policies, check sizes, or find trending items. How can I help you today?",
+    "Hello! 👋 I'm your **MyShop AI Assistant**.\n\nI can help you discover products, track active orders, explain return policies, check sizes, or find trending items across MyShop. How can I help you today?",
 };
 
 export function Chatbot() {
@@ -160,14 +160,14 @@ export function Chatbot() {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          aria-label="Open AI Shopping Assistant"
+          aria-label="Open MyShop AI Assistant"
           className="flex items-center gap-2.5 px-4 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-2xl hover:shadow-blue-600/30 border border-slate-700/80 hover:scale-105 transition-all duration-300 group"
         >
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md">
             <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
           </div>
           <div className="text-left hidden sm:block pr-1">
-            <p className="text-xs font-bold leading-tight">AI Stylist</p>
+            <p className="text-xs font-bold leading-tight">MyShop AI</p>
             <p className="text-[10px] text-slate-300">Ask anything</p>
           </div>
         </button>
@@ -185,7 +185,7 @@ export function Chatbot() {
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h3 className="text-sm font-bold text-white">Shopping Assistant</h3>
+                  <h3 className="text-sm font-bold text-white">MyShop Assistant</h3>
                   <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold uppercase tracking-wider bg-blue-500/30 text-blue-300 border border-blue-400/30">
                     AI
                   </span>
