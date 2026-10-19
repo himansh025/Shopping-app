@@ -94,6 +94,11 @@ export function HomePage({ data = [] }) {
     return list;
   }, [sourceProducts, activeTab, sortOption, searchActive]);
 
+  // Featured Products section shows strictly 8 products (2 rows of 4)
+  const featuredProducts = useMemo(() => {
+    return displayedProducts.slice(0, 8);
+  }, [displayedProducts]);
+
   const handleClearSearch = () => {
     dispatch(clearSearch());
   };
@@ -168,7 +173,7 @@ export function HomePage({ data = [] }) {
               }
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               {displayedProducts.map((product) => (
                 <ProductCard key={product._id || product.id} product={product} />
               ))}
@@ -311,14 +316,14 @@ export function HomePage({ data = [] }) {
               </div>
             </div>
 
-            {/* Product Cards Grid or Skeletons */}
+            {/* Product Cards Grid or Skeletons (Strictly 8 products, 4 per row) */}
             {status === 'loading' && (!sourceProducts || sourceProducts.length === 0) ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>
-            ) : displayedProducts.length === 0 ? (
+            ) : featuredProducts.length === 0 ? (
               <EmptyState
                 icon={<ShoppingBag className="w-6 h-6 text-slate-400" />}
                 title={`No ${activeTab} Found`}
@@ -334,11 +339,33 @@ export function HomePage({ data = [] }) {
                 }
               />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {displayedProducts.map((product) => (
-                  <ProductCard key={product._id || product.id} product={product} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                  {featuredProducts.map((product) => (
+                    <ProductCard key={product._id || product.id} product={product} />
+                  ))}
+                </div>
+
+                {displayedProducts.length > 8 && (
+                  <div className="mt-12 text-center">
+                    <Link
+                      to={
+                        activeTab === 'Men'
+                          ? '/men'
+                          : activeTab === 'Women'
+                          ? '/women'
+                          : activeTab === 'Electronics'
+                          ? '/electronics'
+                          : '/men'
+                      }
+                      className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-slate-300 bg-white text-slate-800 text-sm font-semibold hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-300 shadow-xs group"
+                    >
+                      <span>Explore All {activeTab !== 'All Products' ? activeTab : 'Products'} ({displayedProducts.length})</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </div>
+                )}
+              </>
             )}
           </section>
 
