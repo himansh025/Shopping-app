@@ -7,7 +7,22 @@ const sendOtpEmail = require("../utils/sendOtpEmail.js");
 
 const signup = async (req, res) => {
   try {
-    const { username,fullname, email, password } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
+    const password = req.body.password;
+    const fullname = (req.body.fullname || req.body.name)?.trim();
+    let username = (req.body.username || email?.split('@')[0] || fullname?.toLowerCase().replace(/\s+/g, ''))?.trim().toLowerCase();
+
+    // Check required fields
+    if (!fullname || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Full name, email, and password are required'
+      });
+    }
+
+    if (!username) {
+      username = email.split('@')[0].replace(/[^a-z0-9]/g, '') + Math.floor(100 + Math.random() * 900);
+    }
 
     // Check if seller already exists
     const existingSeller = await Seller.findOne({ 
@@ -17,7 +32,7 @@ const signup = async (req, res) => {
     if (existingSeller) {
       return res.status(400).json({
         success: false,
-        message: 'Seller already exists with this email or phone number'
+        message: 'Seller already exists with this email or username'
       });
     }
 

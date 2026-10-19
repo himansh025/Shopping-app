@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
 import { Routes, Route } from 'react-router-dom';
 import { CustomerLayout, SellerLayout, AuthLayout } from '../layouts';
-import { HomePage, ProductDetail, Men, Women, Electronics, Boy, Girl, CategoryPage } from '../features/catalog';
+import { HomePage, ProductDetail, Men, Women, Electronics, Boy, Girl } from '../features/catalog';
+import CategoryPage from '../features/catalog/pages/CategoryPage';
 import { CartPage, AddToCart } from '../features/cart';
 import { Wishlist } from '../features/wishlist';
 import { CheckoutPage, PlaceOrder } from '../features/checkout';

@@ -10,13 +10,20 @@ const tempUserStore = {};
 // Signup controller
 const signup = async (req, res) => {
   try {
-    const { username, fullname, email, password } = req.body;
-    
+    const email = req.body.email?.trim().toLowerCase();
+    const password = req.body.password;
+    const fullname = (req.body.fullname || req.body.name)?.trim();
+    let username = (req.body.username || email?.split('@')[0] || fullname?.toLowerCase().replace(/\s+/g, ''))?.trim().toLowerCase();
+
     // Validate required fields
-    if (!username || !fullname || !email || !password) {
+    if (!fullname || !email || !password) {
       return res.status(400).json({ 
-        error: "Username, full name, email, and password are required" 
+        error: "Full name, email, and password are required" 
       });
+    }
+
+    if (!username) {
+      username = email.split('@')[0].replace(/[^a-z0-9]/g, '') + Math.floor(100 + Math.random() * 900);
     }
 
     // Check if user exists
