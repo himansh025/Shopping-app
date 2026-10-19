@@ -4,10 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
-  Truck,
-  ShieldCheck,
-  RotateCcw,
-  Sparkles,
   Search,
   X,
   ArrowUpDown,
@@ -16,6 +12,7 @@ import {
 import { clearSearch } from '../../../store/slices/productsSlice';
 import ProductCard from '../components/ProductCard';
 import AllCategories from '../components/AllCategories';
+import HeroSection from '../components/HeroSection';
 import SignatureCarousel from '../components/SignatureCarousel';
 import EditorialBanner from '../components/EditorialBanner';
 import BrandStory from '../components/BrandStory';
@@ -23,30 +20,6 @@ import ImageCollage from '../components/ImageCollage';
 import NewsletterSection from '../components/NewsletterSection';
 import { ProductCardSkeleton } from '../../../components/ui/Skeleton';
 import EmptyState from '../../../components/ui/EmptyState';
-import heroBanner from '../../../assets/image_5-1_3a2fbf56-a6b1-46b4-ab26-ec44c26f3307.webp';
-
-const TRUST_PILLARS = [
-  {
-    icon: <Truck className="w-5 h-5 text-blue-600" />,
-    title: 'Free Shipping',
-    desc: 'On qualifying orders nationwide',
-  },
-  {
-    icon: <ShieldCheck className="w-5 h-5 text-blue-600" />,
-    title: 'Verified Merchants',
-    desc: '100% authentic inventory',
-  },
-  {
-    icon: <RotateCcw className="w-5 h-5 text-blue-600" />,
-    title: 'Hassle-Free Returns',
-    desc: '7-day replacement guarantee',
-  },
-  {
-    icon: <Sparkles className="w-5 h-5 text-blue-600" />,
-    title: 'AI Shopping Assistant',
-    desc: 'Instant recommendations & help',
-  },
-];
 
 const HOMEPAGE_TABS = ['All Products', 'Men', 'Women', 'Electronics'];
 
@@ -183,78 +156,8 @@ export function HomePage({ data = [] }) {
       ) : (
         /* Normal Storefront Mode */
         <>
-          {/* Hero Section */}
-          <section className="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white pt-12 pb-16 lg:py-24">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(59,130,246,0.25),rgba(255,255,255,0))]" />
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                {/* Hero Left Content */}
-                <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-white/10 text-blue-300 border border-white/10 backdrop-blur-xs">
-                    <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                    <span>Curated E-Commerce Experience</span>
-                  </div>
-
-                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                    Elevate Your Everyday <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-300">Style & Tech</span>
-                  </h1>
-
-                  <p className="text-base sm:text-lg text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                    Discover authentic fashion, footwear, and personal electronics curated directly from verified merchants with express delivery.
-                  </p>
-
-                  <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
-                    <button
-                      type="button"
-                      onClick={scrollToCatalog}
-                      className="px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-600/30 flex items-center gap-2 transition-all hover:gap-3"
-                    >
-                      <span>Explore Catalog</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                    <Link
-                      to="/electronics"
-                      className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-sm border border-white/10 backdrop-blur-xs transition"
-                    >
-                      Browse Electronics
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Hero Right Visual Banner */}
-                <div className="lg:col-span-5 flex justify-center">
-                  <div className="relative w-full max-w-md aspect-[4/5] rounded-3xl overflow-hidden border border-white/15 shadow-2xl group">
-                    <img
-                      src={heroBanner}
-                      alt="Featured Storefront Products"
-                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-                    <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-white">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-blue-300">New Arrivals</span>
-                      <p className="text-sm font-semibold mt-0.5">Premium Seasonal Collection</p>
-                      <p className="text-xs text-slate-300 mt-1">Starting from ₹499 with genuine warranty</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trust Pillars Grid */}
-              <div className="mt-16 pt-8 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-6">
-                {TRUST_PILLARS.map((pillar, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
-                      {pillar.icon}
-                    </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-white">{pillar.title}</h4>
-                      <p className="text-[11px] text-slate-400 mt-0.5">{pillar.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
+          {/* Modern Magazine-Style Editorial Hero Section */}
+          <HeroSection onExploreClick={scrollToCatalog} />
 
           {/* Category Discovery Section */}
           <AllCategories />

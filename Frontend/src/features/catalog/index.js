@@ -21,5 +21,6 @@ export { default as EditorialBanner } from './components/EditorialBanner';
 export { default as BrandStory } from './components/BrandStory';
 export { default as ImageCollage } from './components/ImageCollage';
 export { default as NewsletterSection } from './components/NewsletterSection';
+export { default as HeroSection } from './components/HeroSection';
 
 export { default } from './pages/HomePage';

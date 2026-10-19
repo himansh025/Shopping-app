@@ -1,5 +1,5 @@
-/* eslint-disable react/prop-types */
-import { useState } from "react";
+/* eslint-disable react/prop-types, no-unused-vars */
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,8 +28,18 @@ const productSchema = z.object({
 
 const AddProducts = ({ onClose }) => {
   const [images, setImages] = useState([]);
+  const [availableCategories, setAvailableCategories] = useState([]);
   const {user}= useSelector((state)=>state.auth)
-  console.log(user)
+  
+  useEffect(() => {
+    axiosInstance.get("/category/all")
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data.categories)) {
+          setAvailableCategories(res.data.categories);
+        }
+      })
+      .catch((err) => console.error("Could not fetch categories:", err));
+  }, []);
   const {
     register,
     handleSubmit,
@@ -133,14 +143,24 @@ const AddProducts = ({ onClose }) => {
   {errors.price && <p className="text-red-500">{errors.price.message}</p>}
 
   {/* Category */}
-  <label htmlFor="category" className="block font-medium mb-1">Category</label>
+  <label htmlFor="category" className="block font-medium mb-1">
+    Category <span className="text-xs font-normal text-slate-500">(Choose or type new)</span>
+  </label>
   <input
     id="category"
+    list="category-suggestions"
     {...register("category")}
-    placeholder="Category"
-    className="w-full p-2 border mb-3"
+    placeholder="Select or enter category..."
+    className="w-full p-2 border mb-1 rounded"
   />
-  {errors.category && <p className="text-red-500">{errors.category.message}</p>}
+  <datalist id="category-suggestions">
+    {availableCategories.map((c) => (
+      <option key={c._id || c.name} value={c.name}>
+        {c.name} ({c.parentCategory})
+      </option>
+    ))}
+  </datalist>
+  {errors.category && <p className="text-red-500 mb-2">{errors.category.message}</p>}
 
   {/* Description */}
   <label htmlFor="description" className="block font-medium mb-1">Description</label>
