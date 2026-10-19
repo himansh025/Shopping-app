@@ -16,5 +16,10 @@ export { default as Categories } from './components/Categories';
 export { default as AllCategories } from './components/AllCategories';
 export { default as ImageSlider } from './components/ImageSlider';
 export { default as SubCat } from './components/SubCat';
+export { default as SignatureCarousel } from './components/SignatureCarousel';
+export { default as EditorialBanner } from './components/EditorialBanner';
+export { default as BrandStory } from './components/BrandStory';
+export { default as ImageCollage } from './components/ImageCollage';
+export { default as NewsletterSection } from './components/NewsletterSection';
 
 export { default } from './pages/HomePage';

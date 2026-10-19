@@ -16,6 +16,11 @@ import {
 import { clearSearch } from '../../../store/slices/productsSlice';
 import ProductCard from '../components/ProductCard';
 import AllCategories from '../components/AllCategories';
+import SignatureCarousel from '../components/SignatureCarousel';
+import EditorialBanner from '../components/EditorialBanner';
+import BrandStory from '../components/BrandStory';
+import ImageCollage from '../components/ImageCollage';
+import NewsletterSection from '../components/NewsletterSection';
 import { ProductCardSkeleton } from '../../../components/ui/Skeleton';
 import EmptyState from '../../../components/ui/EmptyState';
 import heroBanner from '../../../assets/image_5-1_3a2fbf56-a6b1-46b4-ab26-ec44c26f3307.webp';
@@ -249,6 +254,16 @@ export function HomePage({ data = [] }) {
           {/* Category Discovery Section */}
           <AllCategories />
 
+          {/* Signature Carousel Section (from fashion-studio) */}
+          <SignatureCarousel
+            products={sourceProducts}
+            title="Signature Pieces"
+            subtitle="Curated Selection"
+          />
+
+          {/* Editorial Campaign Banner (from fashion-studio) */}
+          <EditorialBanner />
+
           {/* Curated Products Showcase */}
           <section id="featured-showcase" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
@@ -326,6 +341,15 @@ export function HomePage({ data = [] }) {
               </div>
             )}
           </section>
+
+          {/* Brand Story & Atelier Philosophy (from fashion-studio) */}
+          <BrandStory />
+
+          {/* Editorial Lookbook / Image Collage (from fashion-studio) */}
+          <ImageCollage />
+
+          {/* Atelier Newsletter Section (from fashion-studio) */}
+          <NewsletterSection />
         </>
       )}
     </div>
