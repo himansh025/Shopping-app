@@ -2,9 +2,9 @@
 import { Routes, Route } from 'react-router-dom';
 import { CustomerLayout, SellerLayout, AuthLayout } from '../layouts';
 import { HomePage, ProductDetail, Men, Women, Electronics, Boy, Girl } from '../features/catalog';
-import { AddToCart } from '../features/cart';
+import { CartPage, AddToCart } from '../features/cart';
 import { Wishlist } from '../features/wishlist';
-import { PlaceOrder } from '../features/checkout';
+import { CheckoutPage, PlaceOrder } from '../features/checkout';
 import { Orders } from '../features/orders';
 import { Profile } from '../features/account';
 import { Dashboard, SellerProfile, AddProducts } from '../features/seller';
@@ -35,7 +35,9 @@ export function AppRoutes({ user, data }) {
           <Route path="/boy" element={<Boy />} />
           <Route path="/girl" element={<Girl />} />
           <Route path="/item-detail/:id" element={<ProductDetail />} />
+          <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/addToCart/:id" element={<AddToCart />} />
           <Route path="/placedOrder/:id" element={<PlaceOrder />} />
 

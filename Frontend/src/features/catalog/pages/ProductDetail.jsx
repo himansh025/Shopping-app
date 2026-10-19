@@ -169,10 +169,19 @@ export function ProductDetail() {
         dispatch(addToCart(cartPayload));
         toast.success(`Added ${quantity} × "${product.name}" to cart`);
       } else {
-        await axiosInstance.post(`/products/productCart/${product._id || product.id}`, {
-          quantity,
-          selectedSize,
-        });
+        try {
+          await axiosInstance.post('/cart/add', {
+            productId: product._id || product.id,
+            quantity,
+            size: selectedSize || '',
+          });
+        } catch {
+          // Fallback to legacy route if any issue
+          await axiosInstance.post(`/products/productCart/${product._id || product.id}`, {
+            quantity,
+            selectedSize,
+          });
+        }
         dispatch(addToCart(cartPayload));
         toast.success(`Added ${quantity} × "${product.name}" to cart`);
       }
@@ -187,7 +196,7 @@ export function ProductDetail() {
 
   const handleBuyNow = () => {
     if (!product || isOutOfStock) return;
-    navigate(`/placedOrder/${product._id || product.id}`);
+    navigate(`/checkout?buyNow=${product._id || product.id}`);
   };
 
   // Image list parsing

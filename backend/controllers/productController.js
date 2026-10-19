@@ -360,7 +360,7 @@ const getProductsBySeller = async (req, res) => {
 
 
 const wishlist = async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user._id || req.user.id;
   const id = req.params.id;
 
   try {
@@ -370,7 +370,7 @@ const wishlist = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const index = user.wishlist.indexOf(id);
+    const index = user.wishlist.findIndex(item => item && item.toString() === id.toString());
 
     if (index > -1) {
       // already in wishlist -> remove
@@ -382,9 +382,11 @@ const wishlist = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ wishlist: user.wishlist });
+    const populatedUser = await User.findById(userId).populate('wishlist');
+
+    res.status(200).json({ wishlist: populatedUser.wishlist });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong", error });
+    res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 };
 

@@ -2,10 +2,10 @@ const Order = require('../models/OrderModel.js');
 
 const getAllOrders = async (req, res) => {
   try {
-    const sellerId= req.user.id
+    const sellerId = req.user._id || req.user.id;
     
-    const orders =await Order.find({ "products.sellerId": sellerId });
-    if (orders.length < 1) {
+    const rawOrders = await Order.find({ "products.sellerId": sellerId }).sort({ createdAt: -1 });
+    if (!rawOrders || rawOrders.length === 0) {
       return res.status(200).json({
         success: true,
         orders: [],
@@ -14,13 +14,21 @@ const getAllOrders = async (req, res) => {
       });
     }
 
+    // Filter products for this specific seller to preserve privacy in multi-seller orders
+    const orders = rawOrders.map(order => {
+      const orderObj = order.toObject();
+      orderObj.products = orderObj.products.filter(
+        p => p.sellerId && p.sellerId.toString() === sellerId.toString()
+      );
+      return orderObj;
+    });
+
     res.status(200).json({
       success: true,
       orders,
       orderlength: orders.length,
       message: "Orders found"
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -30,62 +38,52 @@ const getAllOrders = async (req, res) => {
   }
 };
 
-
 const OrderbyId = async (req, res) => {
-    try {
-        const { id } = req.body;
-      const order = await Order.findById(id);
-      if(order){
-          res.status(200).json({
-              success: true,
-              order,
-            message:" Orders found"
-          });
-      }
-  
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch users orders',
-        error: error.message
-      });
-    }
-  };
-
-  const userOrders = async (req, res) => {
-    try {
-      const userId = req.user.id;
-  
-      if (!userId) {
-        return res.status(400).json({ message: "User ID not found" });
-      }
-
-      // Always return an array of orders
-      const orders = await Order.find({ userId });
-  
-      if (!orders || orders.length === 0) {
-        return res.status(200).json({
-          success: true,
-          orders: [],
-          message: "No orders found for this user"
-        });
-      }
-  
+  try {
+    const { id } = req.body;
+    const order = await Order.findById(id);
+    if (order) {
       return res.status(200).json({
         success: true,
-        orders, // always an array
-        message: "User's orders found"
-      });
-  
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch user orders',
-        error: error.message
+        order,
+        message: "Orders found"
       });
     }
-  };
-  
-  
+    return res.status(404).json({
+      success: false,
+      message: "Order not found"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch order',
+      error: error.message
+    });
+  }
+};
 
-    module.exports= {OrderbyId,getAllOrders,userOrders}
+const userOrders = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID not found" });
+    }
+
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      orders: orders || [],
+      message: "User's orders found"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user orders',
+      error: error.message
+    });
+  }
+};
+
+module.exports = { OrderbyId, getAllOrders, userOrders };

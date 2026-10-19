@@ -1,2 +1,3 @@
-export { default as AddToCart } from './pages/AddToCart';
-export { default } from './pages/AddToCart';
+export { AddToCart } from './pages/AddToCart';
+export { CartPage } from './pages/CartPage';
+export { default } from './pages/CartPage';

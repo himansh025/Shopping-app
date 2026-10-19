@@ -36,8 +36,9 @@ export function CustomerHeader() {
   const { user } = useSelector((state) => state.auth);
   const cart = useSelector((state) => state.cart || []);
   const wishlist = useSelector((state) => state.wishlist || []);
-
-  const cartCount = Array.isArray(cart) ? cart.length : 0;
+  const cartCount = Array.isArray(cart)
+    ? cart.reduce((sum, item) => sum + (item.quantity || 1), 0)
+    : 0;
   const wishlistCount = Array.isArray(wishlist) ? wishlist.length : 0;
 
   // Sync search input with Redux search
@@ -151,7 +152,7 @@ export function CustomerHeader() {
 
             {/* Cart Link */}
             <Link
-              to="/wishlist"
+              to="/cart"
               aria-label={`Shopping Cart (${cartCount} items)`}
               className="relative p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
             >

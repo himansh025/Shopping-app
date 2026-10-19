@@ -5,33 +5,30 @@ const {
   updateCartItem, 
   removeFromCart, 
   getCart,
-  clearCart
+  clearCart,
+  mergeCart
 } = require('../controllers/cartController.js');
-// const authMiddleware = require('../middlewares/authMiddleware'); // Assuming you have an auth middleware
+const { authMiddleware, authorizeuser } = require('../middleware/authMiddleware.js');
 
-// Add item to cart (requires authentication)
-router.post('/add',
-    //  authMiddleware,
-      addToCart);
-
-// Update cart item quantity
-router.put('/update/:cartItemId',
-    //  authMiddleware, 
-     updateCartItem);
-
-// Remove item from cart
-router.delete('/remove/:cartItemId',
-    //  authMiddleware, 
-     removeFromCart);
+// All cart routes require authenticated customer
+router.use(authMiddleware, authorizeuser);
 
 // Get user's cart
-router.get('/', 
-    // authMiddleware,
-     getCart);
+router.get('/', getCart);
+
+// Add item to cart
+router.post('/add', addToCart);
+
+// Merge guest cart on login
+router.post('/merge', mergeCart);
+
+// Update cart item quantity
+router.put('/update/:cartItemId', updateCartItem);
+
+// Remove item from cart
+router.delete('/remove/:cartItemId', removeFromCart);
 
 // Clear entire cart
-router.delete('/clear',
-    //  authMiddleware,
-      clearCart);
+router.delete('/clear', clearCart);
 
 module.exports = router;

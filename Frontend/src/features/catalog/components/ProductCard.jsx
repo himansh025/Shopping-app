@@ -103,7 +103,11 @@ export function ProductCard({ product, className = '' }) {
         dispatch(addToCart(product));
         toast.success(`Added "${product.name}" to cart`);
       } else {
-        await axiosInstance.post(`/products/productCart/${productId}`, {});
+        try {
+          await axiosInstance.post('/cart/add', { productId, quantity: 1, size: '' });
+        } catch {
+          await axiosInstance.post(`/products/productCart/${productId}`, {});
+        }
         dispatch(addToCart(product));
         toast.success(`Added "${product.name}" to cart`);
       }

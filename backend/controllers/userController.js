@@ -247,20 +247,28 @@ const userwishlist=  async (req, res) => {
   }
 };
 
-const userCart=  async (req, res) => {
-  const userId = req.user.id; // (get user ID from token or session)
+const userCart = async (req, res) => {
+  const userId = req.user._id || req.user.id;
   try {
-    if(!userId){
-      return res.status(404).json({ message: "user not found" });
-    }
-    const usercart = await User.findById(userId).populate('cart');
-    if (!usercart) {
-      return res.status(404).json({ message: "usercart not found" });
-    }
+    const Cart = require('../models/CartModel');
+    const cartDoc = await Cart.findOne({ user: userId }).populate({
+      path: 'items.product',
+      select: 'name price images brand stock category seller'
+    });
 
-    res.status(200).json({ cart: usercart.cart,message :"successfullty get the user cart data" });
+    const cartItems = (cartDoc?.items || []).filter(item => item.product).map(item => {
+      const prod = item.product.toObject ? item.product.toObject() : item.product;
+      return {
+        ...prod,
+        quantity: item.quantity,
+        size: item.size,
+        cartItemId: item._id
+      };
+    });
+
+    res.status(200).json({ cart: cartItems, message: "successfully get the user cart data" });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong", error });
+    res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 };
 
