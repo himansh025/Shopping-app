@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { login } from '../store/authSlicer.js';
 import axiosInstance from '../Config/apiConfig.js';
-import { Spinner } from 'react-bootstrap';
+import Spinner from '../components/ui/Spinner.jsx';
 
 const VerifyOtp = () => {
     const [otp, setOtp] = useState('');
