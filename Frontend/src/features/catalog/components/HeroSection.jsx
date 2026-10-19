@@ -5,7 +5,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowRight,
-  Sparkles,
   Truck,
   ShieldCheck,
   RotateCcw,
@@ -135,17 +134,6 @@ export function HeroSection({ onExploreClick }) {
         {/* Foreground Content Container */}
         <div className="relative z-10 max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex flex-col justify-end pb-20 sm:pb-24">
           <div className="max-w-2xl text-white">
-            {/* Tag & Badge */}
-            <div className="flex flex-wrap items-center gap-2.5 mb-4 sm:mb-5">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-white/15 backdrop-blur-md border border-white/20 text-white">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                {slide.tag}
-              </span>
-              <span className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-400 text-slate-950">
-                {slide.badge}
-              </span>
-            </div>
-
             {/* Title */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08] mb-4 sm:mb-5">
               {slide.title}
