@@ -105,10 +105,17 @@ const signup = async (req, res) => {
       message: 'Seller registered successfully. Please verify OTP.'
     });
   } catch (error) {
+    console.error("Seller signup error:", error);
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0] || 'email';
+      return res.status(400).json({
+        success: false,
+        message: `${field === 'email' ? 'This email' : field} is already registered. Please log in or use a different one.`
+      });
+    }
     res.status(500).json({
       success: false,
-      message: 'Error in seller registration',
-      error: error.message
+      message: error.message || 'Error in seller registration'
     });
   }
 };

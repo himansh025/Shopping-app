@@ -22,8 +22,7 @@ const SellerSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: String,
-    unique: true,
-    sparse: true
+    trim: true
   },
   password: {
     type: String,

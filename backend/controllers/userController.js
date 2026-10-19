@@ -77,8 +77,13 @@ const signup = async (req, res) => {
     
   } catch (error) {
     console.error("Signup error:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        error: "An account with this email already exists. Please log in." 
+      });
+    }
     res.status(500).json({ 
-      error: "Server error during signup process",
+      error: error.message || "Server error during signup process",
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
