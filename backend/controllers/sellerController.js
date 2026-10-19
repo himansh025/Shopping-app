@@ -181,6 +181,14 @@ const login = async (req, res) => {
       });
     }
 
+    // Check if seller account is disabled
+    if (seller.status === 'disabled') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your seller account has been disabled by the administrator.'
+      });
+    }
+
     // Compare passwords
     const isMatch = await bcrypt.compare(password, seller.password);
 

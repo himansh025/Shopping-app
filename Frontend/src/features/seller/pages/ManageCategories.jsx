@@ -45,7 +45,7 @@ export function ManageCategories() {
     try {
       setLoading(true);
       setError(null);
-      const res = await axiosInstance.get('/category/all');
+      const res = await axiosInstance.get('/category/all?all=true');
       if (res.data?.success && Array.isArray(res.data.categories)) {
         setCategories(res.data.categories);
       } else {
@@ -366,20 +366,37 @@ export function ManageCategories() {
                   >
                     {cat.parentCategory}
                   </span>
-                  <span
-                    className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                      cat.status === 'active'
-                        ? 'bg-emerald-500/10 text-emerald-400'
-                        : 'bg-slate-800 text-slate-400'
-                    }`}
-                  >
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        cat.status === 'active' ? 'bg-emerald-400' : 'bg-slate-500'
+                      className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full ${
+                        cat.status === 'active'
+                          ? 'bg-emerald-500/10 text-emerald-400'
+                          : 'bg-slate-800 text-slate-400'
                       }`}
-                    />
-                    {cat.status}
-                  </span>
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          cat.status === 'active' ? 'bg-emerald-400' : 'bg-slate-500'
+                        }`}
+                      />
+                      {cat.status}
+                    </span>
+                    {cat.approvalStatus === 'pending' && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        ⏳ Pending Approval
+                      </span>
+                    )}
+                    {cat.approvalStatus === 'rejected' && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                        ✕ Rejected
+                      </span>
+                    )}
+                    {cat.approvalStatus === 'approved' && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        ✓ Approved
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Thumbnail & Title */}

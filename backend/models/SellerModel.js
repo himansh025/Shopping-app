@@ -52,6 +52,11 @@ const SellerSchema = new mongoose.Schema({
     type: String,
     enum: ['seller'],
     default: 'seller'
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'active', 'disabled'],
+    default: 'pending'
   }
 }, { timestamps: true });
 

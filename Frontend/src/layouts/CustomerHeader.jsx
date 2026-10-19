@@ -12,6 +12,7 @@ import {
   X,
   Package,
   Store,
+  ShieldCheck,
 } from 'lucide-react';
 import { logout } from '../store/slices/authSlice';
 import { clearSearch, setProducts } from '../store/slices/productsSlice';
@@ -164,6 +165,17 @@ export function CustomerHeader() {
               )}
             </Link>
 
+            {/* Admin Portal Fast Shortcut */}
+            {user?.role === 'admin' && (
+              <Link
+                to="/admin/dashboard"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 transition-colors shadow-xs"
+              >
+                <ShieldCheck className="w-4 h-4 text-purple-600" />
+                <span>Admin Panel</span>
+              </Link>
+            )}
+
             {/* User Account Dropdown */}
             {user ? (
               <Dropdown>
@@ -182,6 +194,17 @@ export function CustomerHeader() {
                     Signed in as <span className="font-semibold text-slate-900">{user.email || user.username}</span>
                   </DropdownLabel>
                   <DropdownSeparator />
+                  {user.role === 'admin' && (
+                    <>
+                      <DropdownItem
+                        icon={<ShieldCheck className="w-4 h-4 text-purple-600" />}
+                        onClick={() => navigate('/admin/dashboard')}
+                      >
+                        <span className="font-semibold text-purple-700">Admin Control Panel</span>
+                      </DropdownItem>
+                      <DropdownSeparator />
+                    </>
+                  )}
                   <DropdownItem
                     icon={<User className="w-4 h-4" />}
                     onClick={() => navigate('/profile')}
@@ -314,6 +337,16 @@ export function CustomerHeader() {
             </div>
             {user ? (
               <>
+                {user.role === 'admin' && (
+                  <Link
+                    to="/admin/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 mb-1"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-purple-600" />
+                    <span>Admin Control Panel</span>
+                  </Link>
+                )}
                 <Link
                   to="/orders"
                   onClick={() => setMobileMenuOpen(false)}

@@ -33,6 +33,21 @@ const CategorySchema = new mongoose.Schema(
       enum: ["active", "inactive"],
       default: "active",
     },
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+      index: true,
+    },
+    createdByRole: {
+      type: String,
+      enum: ["seller", "admin"],
+      default: "admin",
+    },
+    createdByName: {
+      type: String,
+      default: "Admin",
+    },
   },
   { timestamps: true }
 );

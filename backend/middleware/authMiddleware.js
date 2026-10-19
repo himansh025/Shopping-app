@@ -15,8 +15,7 @@ const authMiddleware = async (req, res, next) => {
     const { userId } = decoded;
 
     let user = await User.findById(userId);
-    // console.log(user)
-    let role = 'user';
+    let role = user ? (user.role || 'user') : 'user';
 
     if (!user) {
       user = await Seller.findById(userId);
@@ -27,9 +26,9 @@ const authMiddleware = async (req, res, next) => {
       return res.status(404).json({ error: "User not found!" });
     }
 
-    // Select only safe fields
-    if (role === 'user') {
-      user = await User.findById(userId).select('username email fullname phone');
+    // Select safe fields
+    if (role === 'admin' || role === 'user') {
+      user = await User.findById(userId).select('username email fullname phone role');
     } else if (role === 'seller') {
       user = await Seller.findById(userId).select('-password -otp');
     }
@@ -37,7 +36,8 @@ const authMiddleware = async (req, res, next) => {
     req.user = {
       ...user.toObject(),
       id: user._id.toString(),
-      role
+      role: user.role || role,
+      status: user.status
     };
 
     next();
@@ -47,9 +47,8 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-
 const authorizeuser = (req, res, next) => {
-  if (req.user && req.user.role === 'user') {
+  if (req.user && (req.user.role === 'user' || req.user.role === 'admin')) {
     next();
   } else {
     res.status(403).json({ message: 'Not authorized as user' });
@@ -58,9 +57,20 @@ const authorizeuser = (req, res, next) => {
 
 const authorizeseller = (req, res, next) => {
   if (req.user && req.user.role === 'seller') {
+    if (req.user.status === 'disabled') {
+      return res.status(403).json({ success: false, message: 'Your seller account has been disabled by administrator.' });
+    }
     next();
   } else {
     res.status(403).json({ message: 'Not authorized as seller' });
+  }
+};
+
+const authorizeAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ success: false, message: 'Not authorized as administrator' });
   }
 };
 
@@ -105,4 +115,4 @@ const optionalAuthMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, authorizeseller, authorizeuser, optionalAuthMiddleware };
+module.exports = { authMiddleware, authorizeseller, authorizeuser, authorizeAdmin, optionalAuthMiddleware };

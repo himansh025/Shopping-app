@@ -39,6 +39,11 @@ const createCategory = async (req, res) => {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
 
+    const isAdmin = req.user && req.user.role === 'admin';
+    const approvalStatus = isAdmin ? 'approved' : 'pending';
+    const createdByRole = isAdmin ? 'admin' : 'seller';
+    const createdByName = isAdmin ? 'Admin' : (req.user?.fullname || req.user?.businessName || 'Seller');
+
     const newCategory = new Category({
       name: trimmedName,
       slug,
@@ -46,13 +51,18 @@ const createCategory = async (req, res) => {
       parentCategory: parentCategory || "Other",
       status: status || "active",
       image: imageUrl,
+      approvalStatus,
+      createdByRole,
+      createdByName,
     });
 
     const savedCategory = await newCategory.save();
 
     res.status(201).json({
       success: true,
-      message: "Category created successfully",
+      message: isAdmin
+        ? "Category created and approved successfully!"
+        : "Category submitted for review! It will be available once approved by administrator.",
       category: savedCategory,
     });
   } catch (error) {
@@ -68,9 +78,16 @@ const createCategory = async (req, res) => {
 // Get all categories with optional filters
 const getAllCategories = async (req, res) => {
   try {
-    const { search, parentCategory, status } = req.query;
+    const { search, parentCategory, status, all, approvalStatus } = req.query;
 
     const filter = {};
+
+    // For public / storefront, only show approved categories
+    if (!all || all !== "true") {
+      filter.approvalStatus = { $nin: ["pending", "rejected"] };
+    } else if (approvalStatus && approvalStatus !== "all") {
+      filter.approvalStatus = approvalStatus;
+    }
 
     if (search) {
       filter.$or = [
@@ -94,6 +111,7 @@ const getAllCategories = async (req, res) => {
       categories.map(async (cat) => {
         const productCount = await Product.countDocuments({
           category: { $regex: `^${cat.name}$`, $options: "i" },
+          approvalStatus: { $nin: ["pending", "rejected"] }
         });
         return {
           ...cat.toObject(),

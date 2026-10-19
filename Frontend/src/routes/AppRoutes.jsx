@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Routes, Route } from 'react-router-dom';
-import { CustomerLayout, SellerLayout, AuthLayout } from '../layouts';
+import { CustomerLayout, SellerLayout, AdminLayout, AuthLayout } from '../layouts';
 import { HomePage, ProductDetail, Men, Women, Electronics, Boy, Girl } from '../features/catalog';
 import CategoryPage from '../features/catalog/pages/CategoryPage';
 import { CartPage, AddToCart } from '../features/cart';
@@ -9,6 +9,7 @@ import { CheckoutPage, PlaceOrder } from '../features/checkout';
 import { Orders } from '../features/orders';
 import { Profile } from '../features/account';
 import { Dashboard, SellerProfile, AddProducts, ManageCategories } from '../features/seller';
+import { AdminDashboard, AdminSellers, AdminProducts, AdminCategories } from '../features/admin';
 import { Login, Signup, Forget, VerifyOtp } from '../features/auth';
 
 /**
@@ -69,6 +70,15 @@ export function AppRoutes({ user, data }) {
           )}
         </Route>
       )}
+
+      {/* Dedicated Admin Workspace Shell */}
+      <Route element={<AdminLayout />}>
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/sellers" element={<AdminSellers />} />
+        <Route path="/admin/products" element={<AdminProducts />} />
+        <Route path="/admin/categories" element={<AdminCategories />} />
+      </Route>
 
       {/* Dedicated Authentication Shell */}
       <Route element={<AuthLayout />}>

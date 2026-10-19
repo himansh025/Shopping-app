@@ -21,10 +21,22 @@ const Product = new mongoose.Schema(
 
     // Seller Details
     seller: {
-      sellerId: { type: mongoose.Schema.Types.ObjectId, ref: "Seller", required: true },
-      name: { type: String, required: true },
-      email: { type: String, required: true },
-      contact: { type: String, required: true },
+      sellerId: { type: mongoose.Schema.Types.ObjectId, ref: "Seller", required: false },
+      name: { type: String, default: "MyShop Official" },
+      email: { type: String, default: "support@myshop.com" },
+      contact: { type: String, default: "N/A" },
+    },
+
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+      index: true,
+    },
+    createdByRole: {
+      type: String,
+      enum: ["seller", "admin"],
+      default: "seller",
     },
   },
   { timestamps: true }

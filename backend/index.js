@@ -27,6 +27,7 @@ app.use("/api/v1/order", require("./routes/paymentRoute.js"));
 app.use("/api/v1/orderDetail", require("./routes/orderRoute.js"));
 app.use("/api/v1/chatbot", require("./routes/chatbotRoutes.js"));
 app.use("/api/v1/category", require("./routes/categoryRoute.js"));
+app.use("/api/v1/admin", require("./routes/adminRoute.js"));
 
 
 const PORT = process.env.PORT || 5000;

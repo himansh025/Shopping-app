@@ -1,8 +1,9 @@
 const Product = require('../models/ProductModel.js');
 const User = require('../models/UserModel.js');
+const Seller = require('../models/SellerModel.js');
 const { uploadOnCloudinary } = require('../utils/cloudinary.js');
+
 // Controller for creating products
-// const mongoose = require("mongoose")
 const createProduct = async (req, res) => {
   try {
     const {
@@ -16,7 +17,6 @@ const createProduct = async (req, res) => {
       seller
     } = req.body;
 
-
     // Validate required fields
     if (!name || !price || !category || !description || !stock) {
       return res.status(400).json({
@@ -25,15 +25,17 @@ const createProduct = async (req, res) => {
       });
     }
 
-    const attributesString = JSON.parse(attributes);
-    const sellerStrrng = JSON.parse(seller);
-
-    // Validate seller information
-    if (!seller) {
-      return res.status(400).json({
-        success: false,
-        message: 'Complete seller information is required'
-      });
+    const attributesString = attributes ? (typeof attributes === 'string' ? JSON.parse(attributes) : attributes) : {};
+    let sellerInfo = {};
+    if (seller) {
+      sellerInfo = typeof seller === 'string' ? JSON.parse(seller) : seller;
+    } else if (req.user) {
+      sellerInfo = {
+        sellerId: req.user.id || req.user._id,
+        name: req.user.fullname || req.user.name || (req.user.role === 'admin' ? 'MyShop Official' : 'Seller'),
+        email: req.user.email,
+        contact: req.user.phone || 'N/A'
+      };
     }
 
     // Validate file uploads
@@ -66,29 +68,38 @@ const createProduct = async (req, res) => {
       }
     }
 
+    // Determine approval status
+    const isAdmin = req.user && req.user.role === 'admin';
+    const approvalStatus = isAdmin ? 'approved' : 'pending';
+    const createdByRole = isAdmin ? 'admin' : 'seller';
+
     // Create product with all data
-    const newProduct = await new Product({
+    const newProduct = new Product({
       name,
-      price,
+      price: Number(price),
       category,
       description,
-      stock,
+      stock: Number(stock),
       brand: brand || "",
       attributes: attributesString || {},
       images: imageUrls,
       seller: {
-        sellerId: sellerStrrng.sellerId,
-        name: sellerStrrng.name,
-        email: sellerStrrng.email,
-        contact: sellerStrrng.contact
-      }
+        sellerId: sellerInfo.sellerId,
+        name: sellerInfo.name,
+        email: sellerInfo.email,
+        contact: sellerInfo.contact || 'N/A'
+      },
+      approvalStatus,
+      createdByRole
     });
 
     const savedProduct = await newProduct.save();
 
     res.status(201).json({
       success: true,
-      message: 'Product created successfully',
+      message: isAdmin 
+        ? 'Product created and approved successfully!' 
+        : 'Product submitted for review! It will be visible on the store once approved by administrator.',
       product: savedProduct
     });
   } catch (error) {
@@ -101,35 +112,45 @@ const createProduct = async (req, res) => {
   }
 };
 
-// Get all products
-// Get all products
+// Get all products (Public storefront - only approved products from active sellers)
 const getAllProducts = async (req, res) => {
   try {
-    const { name, category } = req.query;
+    const { name, category, all } = req.query;
 
-    // Build filter object for searching
     let filter = {};
+
+    // For public customer storefront, only show approved products
+    if (!all || all !== 'true') {
+      filter.approvalStatus = { $nin: ['pending', 'rejected'] };
+
+      // Also filter out products whose seller is disabled
+      const disabledSellers = await Seller.find({ status: 'disabled' }).select('_id');
+      if (disabledSellers && disabledSellers.length > 0) {
+        const disabledIds = disabledSellers.map(s => s._id);
+        filter['seller.sellerId'] = { $nin: disabledIds };
+      }
+    }
 
     // If there is a search query in 'name', apply it across multiple fields
     if (name) {
-      const searchQuery = { $regex: name, $options: 'i' }; // Case-insensitive search
-      filter = {
+      const searchQuery = { $regex: name, $options: 'i' };
+      filter.$and = filter.$and || [];
+      filter.$and.push({
         $or: [
-          { name: searchQuery },  // Search in the product name
-          { category: searchQuery },  // Search in the category
-          { brand: searchQuery }  // Search in the brand
+          { name: searchQuery },
+          { category: searchQuery },
+          { brand: searchQuery }
         ]
-      };
+      });
     }
 
     // Specific category filter
     if (category) {
-      // Use case-insensitive regex for category to match "Women" or "Women's"
       filter.category = { $regex: category, $options: 'i' };
     }
 
     // Fetch products that match the filter
-    const products = await Product.find(filter);
+    const products = await Product.find(filter).sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       count: products.length,

@@ -38,6 +38,10 @@ export function Login() {
         sessionStorage.setItem("user", JSON.stringify(userData));
         
         dispatch(login({ user: userData }));
+        if (userData?.role === 'admin') {
+          navigate("/admin/dashboard");
+          return;
+        }
         if (res.data?.isVerified) {
           navigate("/dashboard");
           return;
