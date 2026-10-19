@@ -7,9 +7,14 @@ const Seller = require("../models/SellerModel");
 const User = require("../models/UserModel");
 
 const OpenAI = require("openai");
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+let openai;
+try {
+    if (process.env.OPENAI_API_KEY) {
+        openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    }
+} catch (e) {
+    console.warn("OpenAI init skipped:", e.message);
+}
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 let groq;
@@ -214,69 +219,64 @@ Generate a short, natural, and relevant response.
 `;
 
     try {
-        // 🚀 Try Groq First
+        // 🚀 1. Try Groq (gpt-oss-120b)
         if (groq) {
-            console.log("Attempting Groq...");
-            const chatCompletion = await groq.chat.completions.create({
-                messages: [{ role: "user", content: prompt }],
-                model: "groq/compound", // or "llama3-70b-8192" for better quality
-            });
-            const groqResponse = chatCompletion.choices[0]?.message?.content;
-            if (groqResponse) return groqResponse.trim();
-            throw new Error("Empty Groq response");
-        } else {
-            throw new Error("Groq client not initialized");
-        }
-
-    } catch (groqError) {
-        console.error("⚠️ Groq Error:", groqError.message);
-
-        try {
-            // 🧠 Fallback to Gemini
-            console.log("Fallback to Gemini...");
-            const model = genAI.getGenerativeModel(
-                {
-                    // model: "gemini-1.5-flash"
-                     model: "gemini-2.5-pro"
-                     });
-            const result = await model.generateContent({
-                contents: [{ parts: [{ text: prompt }] }],
-            });
-
-            const geminiResponse = result?.response?.text?.();
-            if (geminiResponse) return geminiResponse.trim();
-
-            throw new Error("Empty Gemini response");
-        } catch (geminiError) {
-            console.error("⚠️ Gemini Error:", geminiError.message);
-
-            // 🪄 Fallback to ChatGPT
             try {
-                console.log("Fallback to ChatGPT...");
-                const completion = await openai.chat.completions.create({
-                    model: "gpt-4o-mini", // Or "gpt-4o" for more power
+                const chatCompletion = await groq.chat.completions.create({
                     messages: [
-                        {
-                            role: "system",
-                            content: systemPrompts[role] || systemPrompts.user,
-                        },
-                        {
-                            role: "user",
-                            content: query,
-                        },
+                        { role: "system", content: systemPrompts[role] || systemPrompts.user },
+                        { role: "user", content: query }
                     ],
-                    max_tokens: 200,
+                    model: "openai/gpt-oss-120b",
+                    max_tokens: 300,
                     temperature: 0.7,
                 });
-
-                const chatgptResponse = completion.choices[0].message.content;
-                return chatgptResponse.trim();
-            } catch (chatGPTError) {
-                console.error("❌ ChatGPT Fallback Error:", chatGPTError.message);
-                return "I'm having trouble right now. Please try again later.";
+                const groqResponse = chatCompletion.choices[0]?.message?.content;
+                if (groqResponse) return groqResponse.trim();
+            } catch (err1) {
+                console.warn("Groq gpt-oss-120b failed, trying qwen3.8-27b:", err1.message);
+                const chatCompletion = await groq.chat.completions.create({
+                    messages: [
+                        { role: "system", content: systemPrompts[role] || systemPrompts.user },
+                        { role: "user", content: query }
+                    ],
+                    model: "qwen/qwen3.8-27b",
+                    max_tokens: 300,
+                    temperature: 0.7,
+                });
+                const groqResponse = chatCompletion.choices[0]?.message?.content;
+                if (groqResponse) return groqResponse.trim();
             }
         }
+    } catch (groqError) {
+        console.error("⚠️ Groq Error:", groqError.message);
     }
+
+    // 🪄 2. Intelligent Contextual Rule-Based Fallback
+    const q = query.toLowerCase();
+    if (q.includes("how does it work") || q.includes("how it works") || q.includes("work")) {
+        return "Welcome to our store! 🛍️ Here's how it works:\n\n1. **Browse & Discover**: Explore curated Men's, Women's, and Electronics collections.\n2. **Select & Add to Bag**: Pick your preferred size and add to cart.\n3. **Quick Checkout**: Pay online via UPI/Cards or choose Cash on Delivery (COD).\n4. **Express Delivery**: Enjoy fast shipping directly to your doorstep with easy 7-day returns!";
+    }
+    if (q.includes("order") || q.includes("track") || q.includes("delivery")) {
+        if (context.orders?.length) {
+            return `You have ${context.orders.length} order(s). Your latest order status is **${context.orders[0].status}**. You can track full details on your [Orders page](/orders).`;
+        }
+        return "You can check and track all your active and previous orders by navigating to your [Orders page](/orders).";
+    }
+    if (q.includes("pay") || q.includes("payment") || q.includes("cod") || q.includes("upi")) {
+        return "We support multiple payment methods:\n- **UPI**: Google Pay, PhonePe, Paytm\n- **Online Gateway**: Razorpay (Credit/Debit cards, Net Banking)\n- **Cash on Delivery (COD)** on eligible pincodes!";
+    }
+    if (q.includes("return") || q.includes("refund") || q.includes("exchange")) {
+        return "We offer a **7-Day Hassle-Free Return & Exchange** guarantee. If you're not satisfied, you can initiate a doorstep return or exchange right from your order history.";
+    }
+    if (q.includes("cart") || q.includes("bag")) {
+        return "You can view and manage your selected items anytime by opening your [Shopping Bag](/cart).";
+    }
+    if (q.includes("wishlist") || q.includes("favorite") || q.includes("saved")) {
+        return "You can view all your saved items anytime on your [Wishlist page](/wishlist).";
+    }
+
+    return "Hello! I am your AI Shopping Assistant. You can ask me to help you find products, track active orders, explain return policies, or check sizing details. What would you like to explore today?";
 };
 
 // ✅ Main handler
