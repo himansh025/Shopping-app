@@ -217,7 +217,10 @@ export function Chatbot() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-slate-50/70 text-slate-800 text-xs sm:text-sm">
+          <div
+            className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-slate-50/70 text-slate-800 text-xs sm:text-sm no-scrollbar scrollbar-none"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -267,7 +270,10 @@ export function Chatbot() {
                         </blockquote>
                       ),
                       table: ({ children }) => (
-                        <div className="overflow-x-auto my-2 rounded-xl border border-slate-200 shadow-xs">
+                        <div
+                          className="overflow-x-auto my-2 rounded-xl border border-slate-200 shadow-xs no-scrollbar scrollbar-none"
+                          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                        >
                           <table className="min-w-full divide-y divide-slate-200 text-xs text-left bg-white">{children}</table>
                         </div>
                       ),
@@ -316,7 +322,10 @@ export function Chatbot() {
           </div>
 
           {/* Quick Suggestion Chips */}
-          <div className="px-3 py-2 bg-white border-t border-slate-100 overflow-x-auto flex gap-1.5 no-scrollbar">
+          <div
+            className="px-3 py-2 bg-white border-t border-slate-100 overflow-x-auto flex gap-1.5 no-scrollbar scrollbar-none"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {quickQuestions.map((q, idx) => (
               <button
                 key={idx}

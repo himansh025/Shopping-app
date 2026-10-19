@@ -200,3 +200,19 @@ body {
   color: #92400e !important;
   border-left: 4px solid #d97706 !important;
 }
+
+/* ==========================================================================
+   Scrollbar Utilities: Scrollable without showing scrollbar UI
+   ========================================================================== */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
