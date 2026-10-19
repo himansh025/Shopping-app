@@ -36,7 +36,7 @@ const SellerProfile = () => {
   if (loading) return <p className="text-center  ">Loading seller profile...</p>;
 
   return (
-    <div className="max-w-6xl  mx-auto p-6 mt-30 bg-white rounded-lg shadow-md">
+    <div className="max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-xs border border-slate-200/80">
       <h2 className="text-2xl text-center font-semibold mb-4">Seller Profile</h2>
       <BackArrow className="mb-4" size={32} />
       <div className="flex flex-col  md:flex-row justify-around">

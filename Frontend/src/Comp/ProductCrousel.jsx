@@ -58,7 +58,7 @@ function ProductCarousel({ className = '' }) {
       tabIndex={0}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className={`relative w-full max-w-7xl mx-auto mt-20 h-[380px] md:h-[480px] overflow-hidden rounded-2xl shadow-md bg-slate-900 group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${className}`}
+      className={`relative w-full max-w-7xl mx-auto my-6 h-[380px] md:h-[480px] overflow-hidden rounded-2xl shadow-md bg-slate-900 group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${className}`}
     >
       {/* Slides */}
       <div className="relative w-full h-full">

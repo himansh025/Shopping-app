@@ -32,9 +32,8 @@ function Forget() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-3">Forgot  Password</h2>
+    <div className="w-full max-w-md p-6 sm:p-8 bg-white rounded-2xl shadow-md border border-slate-200/80">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center text-slate-900 mb-3">Forgot Password</h2>
         <p className="text-sm text-gray-500 text-center mb-6">
           {emailSent 
             ? `Recovery email sent! Check your inbox.` 
@@ -105,7 +104,6 @@ function Forget() {
           </div>
         )}
       </div>
-    </div>
   );
 }
 

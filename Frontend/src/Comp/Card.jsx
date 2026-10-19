@@ -1,48 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import {  useNavigate } from 'react-router-dom';
-function Card({items,remove}) {
-  const [pureitem,setpureitem]= useState([])
-  // const {items}= useSelector((state)=>state.products)
-  const navigate= useNavigate() 
-  // console.log(items) 
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from 'react';
+import ProductCard from './ProductCard';
 
-  useEffect(()=>{
+export function Card({ items = [], remove }) {
+  const [pureItem, setPureItem] = useState([]);
 
-    if(remove){
-      // console.log(remove[0]?._id)
-      let removeDuplicateiItem= items.filter((item)=>item._id!=remove[0]?._id)
-      setpureitem(removeDuplicateiItem);
-      // console.log(pureitem)
+  useEffect(() => {
+    if (remove && Array.isArray(items)) {
+      const removeId = remove._id || remove[0]?._id;
+      const filtered = items.filter((item) => (item._id || item.id) !== removeId);
+      setPureItem(filtered);
+    } else {
+      setPureItem(items);
     }
-  },[])
+  }, [items, remove]);
 
-const handleitem= (item)=>{
-  navigate(`/item-detail/${item}`)
- 
-}
+  const displayList = pureItem && pureItem.length > 0 ? pureItem : items;
+
+  if (!displayList || displayList.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="w-max md:w-full md:flex md:justify-around  grid mx-auto  overflow-hidden  sm:mx-auto grid-cols-1 sm:grid-cols-2 md:flex-row md:flex-wrap lg:mx-auto  lg:grid-cols-3 gap-6 ">
-          {(pureitem.length>0? pureitem : items )?.map((item,index) => (
-        <div key={index} className=" p-3 bg-white rounded-lg shadow-md overflow-hidden transition transform hover:scale-105 hover:shadow-lg h-fit w-[300px] flex flex-col">
-          <img
-            src={item.images[0]}
-            alt={item.name}
-            className="w-full h-[200px] object-cover rounded-lg"
-            />
-          <h5 className=" text-md font-bold mt-3"> {item.name}</h5>
-          <p className="text-gray-600 text-sm">Category: {item.category}</p>
-          <p className="text-gray-600 text-sm">Brand: {item.brand}</p>
-          <p className="text-gray-700 text-sm">Price: ₹{item.price}</p>
-        <div className='flex justify-center rounded-3xl'> 
-        <button onClick={()=>handleitem(item._id)} className="mt-auto w-max bg-green-600  text-white px-2 py-2 text-md   hover:bg-green-700">
-            View Item
-          </button>
-        </div>
-        </div>
+    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {displayList.map((product, index) => (
+        <ProductCard
+          key={product._id || product.id || index}
+          product={product}
+        />
       ))}
     </div>
-      );
+  );
 }
 
 export default Card;

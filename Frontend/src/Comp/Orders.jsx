@@ -43,7 +43,7 @@ const Orders = () => {
 
 
   return (
-    <div className="max-w-4xl md:mt-30 mt-40  mx-auto p-6">
+    <div className="max-w-4xl mx-auto py-6 px-4">
        <BackArrow className="mb-4" size={32} />
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">My Orders</h1>

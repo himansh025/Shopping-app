@@ -16,8 +16,8 @@ useEffect(() => {
 const navigate= useNavigate()
 
     return (
-        <div className="p-5">
-            <h2 className="text-2xl font-bold">Your Wishlist</h2>
+        <div className="max-w-6xl mx-auto py-8 px-4">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">Your Wishlist</h2>
             {wishlist.length === 0 ? (
                 <p className="mt-3">No items in wishlist.</p>
             ) : (

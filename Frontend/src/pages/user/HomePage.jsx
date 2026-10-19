@@ -4,8 +4,6 @@ import { ShoppingCart } from "lucide-react";
 import ProductCrousel from "../../Comp/ProductCrousel";
 import Card from "../../Comp/Card";
 import AllCategories from "../../Comp/AllCategories";
-import NavLinks from "../../Comp/NavLinks";
-
 import Loader from "../../Comp/Loader";
 
 function HomePage({ data }) {
@@ -15,15 +13,10 @@ function HomePage({ data }) {
   if (!items?.length && status === "loading") return <Loader />;
 
   return (
-    <div className="min-h-screen w-full bg-gray-100">
-
-      {user && (
-        <NavLinks />
-      )}
-
+    <div className="min-h-screen w-full bg-slate-50">
       {!searchActive ? (
         <>
-          <ProductCrousel className="mt-10" />
+          <ProductCrousel />
 
           <section className="bg-white py-16 text-center">
             <h1 className="text-4xl font-bold text-gray-800">

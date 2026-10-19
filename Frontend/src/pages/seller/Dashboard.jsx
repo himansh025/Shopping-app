@@ -68,7 +68,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="max-w-6xl mt-30 mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-xs border border-slate-200/80">
       <h2 className="text-2xl font-semibold mb-4">
         Your Products ({displayProducts.length})
       </h2>

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import HomePage from './pages/user/HomePage';
-import Layout from './Comp/Layout';
+import { CustomerLayout, SellerLayout, AuthLayout } from './layouts';
 import AddToCart from './Comp/AddToCart';
 import PlaceOrder from './Comp/PlacedOrder';
 import Login from './Comp/Auth/Login';
@@ -21,13 +21,11 @@ import Dashboard from './pages/seller/Dashboard';
 import Profile from './pages/user/Profile';
 import SellerProfile from './pages/seller/SellerProfile'
 import { useDispatch, useSelector } from 'react-redux';
-import { createContext, useState } from 'react';
-import { useEffect } from 'react';
-import { loadAllProducts, setProducts, setLoading } from './store/productsSlicer'
+import { createContext, useState, useEffect } from 'react';
+import { loadAllProducts, setLoading } from './store/productsSlicer'
 import VerifyOtp from './Comp/VerifyOtp';
 import { setWishlist } from './store/wishlistSlice';
 import { setToCart } from './store/cartSlicer';
-import Chatbot from './Comp/Chatbot';
 export const ToastContext = createContext();
 
 function App() {
@@ -112,45 +110,44 @@ function App() {
     <ToastContext.Provider value={showToast}>
       <Router>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          {/* Seller Workspace Shell */}
+          {user?.role === "seller" ? (
+            <Route element={<SellerLayout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<SellerProfile />} />
+              <Route path="/add" element={<AddProducts />} />
+              <Route path="/orders" element={<Orders />} />
+            </Route>
+          ) : (
+            /* Customer / Storefront Shell */
+            <Route element={<CustomerLayout />}>
+              <Route path="/" element={<HomePage data={Data} />} />
+              <Route path="/men" element={<Men />} />
+              <Route path="/women" element={<Women />} />
+              <Route path="/electronics" element={<Electronics />} />
+              <Route path="/item-detail/:id" element={<ProductDetail />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/addToCart/:id" element={<AddToCart />} />
+              <Route path="/placedOrder/:id" element={<PlaceOrder />} />
 
-            {user?.role != "seller" &&
-              <Route index element={<HomePage data={Data} />} />}
+              {user?.role === "user" && (
+                <>
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/profile" element={<Profile />} />
+                </>
+              )}
+            </Route>
+          )}
+
+          {/* Dedicated Authentication Shell */}
+          <Route element={<AuthLayout />}>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forget" element={<Forget />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />
-            <Route path="/item-detail/:id" element={<ProductDetail />} />
-            <Route path="/men" element={<Men />} />
-            <Route path="/women" element={<Women />} />
-            <Route path="/electronics" element={<Electronics />} />
-
-
-            {user?.role == "seller" && (
-              < >
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/profile" element={<SellerProfile />} />
-                <Route path="/add" element={<AddProducts />} />
-                <Route path="/orders" element={<Orders />} />
-
-              </>
-            )}
-
-            {user?.role === "user" && (
-              <>
-                <Route path="/addToCart/:id" element={<AddToCart />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/wishlist" element={<Wishlist />} />
-                <Route path="/placedOrder/:id" element={<PlaceOrder />} />
-              </>
-            )}
-
           </Route>
-
         </Routes>
-        <Chatbot />
-        {/* Toast Container */}
       </Router>
       <ToastContainer
         position="top-right"
@@ -163,7 +160,6 @@ function App() {
         draggable
         pauseOnHover
       />
-      {/* {user?.role === "user" && <Chatbot />} */}
     </ToastContext.Provider>
   );
 }

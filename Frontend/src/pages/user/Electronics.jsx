@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../Config/apiConfig";
 import Loader from "../../Comp/Loader";
+import ProductCard from "../../Comp/ProductCard";
 
 const Electronics = () => {
   const [elecProducts, setElecProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchElecProducts = async () => {
@@ -21,52 +20,31 @@ const Electronics = () => {
       } finally {
         setLoading(false);
       }
-    }
+    };
     fetchElecProducts();
   }, []);
 
   if (loading) return <Loader />;
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Electronics Gadget Collection</h1>
-      <p className="text-gray-600 mb-6">
-        Discover the latest trends in Electronics Gadget
-      </p>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          Electronics &amp; Gadgets Collection
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Discover the latest smart devices, gadgets, and tech accessories
+        </p>
+      </div>
 
       {elecProducts.length === 0 ? (
-        <p className="text-gray-500 text-center">No products found</p>
+        <div className="text-center py-16 bg-white rounded-2xl border border-slate-200/80">
+          <p className="text-slate-500">No products found in this category</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {elecProducts.map((product) => (
-            <div
-              key={product._id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300"
-            >
-              <img
-                src={product.images?.[0] || "/placeholder.jpg"}
-                alt={product.name}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-lg font-semibold">{product.name}</h3>
-                <p className="text-gray-500 text-sm">{product.category}</p>
-                <p className="text-sm text-gray-700">{product.description}</p>
-                <p className="font-semibold mt-2">₹{product.price}</p>
-                <p className="text-sm text-gray-600">
-                  Brand: {product.brand} | Material: {product.material}
-                </p>
-
-                <p className="text-sm text-gray-600">
-                  Seller: {product.seller?.name} ({product.seller?.contact})
-                </p>
-                <button
-                  onClick={() => navigate(`/addToCart/${product._id}`)}
-                  className="mt-3 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-300">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
+            <ProductCard key={product._id} product={product} />
           ))}
         </div>
       )}

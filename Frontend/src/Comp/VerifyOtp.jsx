@@ -82,9 +82,8 @@ const VerifyOtp = () => {
     };
     
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-            <div className="p-8 w-full max-w-md bg-white rounded-lg shadow-lg">
-                <h3 className="text-2xl font-bold text-center text-gray-800 mb-2">Verify Your Account</h3>
+        <div className="w-full max-w-md p-6 sm:p-8 bg-white rounded-2xl shadow-md border border-slate-200/80">
+            <h3 className="text-2xl font-bold text-center text-slate-900 mb-2">Verify Your Account</h3>
                 <p className="text-sm text-center text-gray-600 mb-6">
                     Enter the 4-digit OTP sent to <span className="font-medium">{email}</span>
                 </p>
@@ -138,8 +137,6 @@ const VerifyOtp = () => {
                     </div>
                 </form>
             </div>
-            <ToastContainer position="top-right" autoClose={3000} />
-        </div>
     );
 };
 

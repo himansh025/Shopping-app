@@ -58,9 +58,8 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br mt-10 from-blue-50 to-indigo-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
+    <div className="w-full max-w-md p-6 sm:p-8 bg-white rounded-2xl shadow-md border border-slate-200/80">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center text-slate-900 mb-6">Create Account</h2>
         <p className="text-center text-gray-500 mb-8">Sign up as {role || "user"}</p>
         
         <form onSubmit={handleSubmit(handleSignup)} className="space-y-2 ">
@@ -212,8 +211,6 @@ const Signup = () => {
           </div>
         </form>
       </div>
-      <ToastContainer position="top-right" autoClose={3000} />
-    </div>
   );
 };
 
