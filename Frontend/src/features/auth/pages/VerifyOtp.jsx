@@ -62,7 +62,11 @@ export function VerifyOtp() {
       }
     } catch (error) {
       console.error('OTP verification error:', error);
-      toast.error(error?.response?.data?.error || 'Invalid OTP. Please try again.');
+      toast.error(
+        error?.response?.data?.error || 
+        error?.response?.data?.message || 
+        'Invalid OTP. Please try again.'
+      );
     } finally {
       setLoading(false);
     }

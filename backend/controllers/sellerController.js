@@ -10,7 +10,6 @@ const signup = async (req, res) => {
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password;
     const fullname = (req.body.fullname || req.body.name)?.trim();
-    let username = (req.body.username || email?.split('@')[0] || fullname?.toLowerCase().replace(/\s+/g, ''))?.trim().toLowerCase();
 
     // Check required fields
     if (!fullname || !email || !password) {
@@ -20,33 +19,66 @@ const signup = async (req, res) => {
       });
     }
 
-    if (!username) {
-      username = email.split('@')[0].replace(/[^a-z0-9]/g, '') + Math.floor(100 + Math.random() * 900);
+    // Check if seller already exists
+    const existingSeller = await Seller.findOne({ email });
+    if (existingSeller) {
+      if (existingSeller.isVerified) {
+        return res.status(400).json({
+          success: false,
+          message: 'This email is already registered as a seller. Please log in.'
+        });
+      } else {
+        // Unverified account: update password and reissue OTP
+        const otp = otpGenerator.generate(4, {
+          upperCaseAlphabets: false,
+          lowerCaseAlphabets: false,
+          specialChars: false,
+          alphabets: false, 
+        });
+        console.log(`[SELLER SIGNUP RESEND OTP] Email: ${email} | OTP: ${otp}`);
+
+        const salt = await bcrypt.genSalt(10);
+        existingSeller.password = await bcrypt.hash(password, salt);
+        existingSeller.fullname = fullname;
+        existingSeller.otp = {
+          code: otp,
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+        };
+        await existingSeller.save();
+
+        try {
+          await sendOtpEmail({ email, fullname, otp });
+        } catch (mailErr) {
+          console.warn("sendOtpEmail warning (SMTP error, logged OTP to console):", mailErr.message);
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: 'Verification code resent. Please verify OTP.'
+        });
+      }
     }
 
-    // Check if seller already exists
-    const existingSeller = await Seller.findOne({ 
-      $or: [{ email }, { username }] 
-    });
-
-    if (existingSeller) {
-      return res.status(400).json({
-        success: false,
-        message: 'Seller already exists with this email or username'
-      });
+    // Auto-generate guaranteed unique username
+    const baseUsername = req.body.username?.trim().toLowerCase() || email.split('@')[0].replace(/[^a-z0-9]/g, '') || 'seller';
+    let username = baseUsername;
+    let counter = 1;
+    while (await Seller.findOne({ username })) {
+      username = `${baseUsername}${Math.floor(100 + Math.random() * 900)}${counter}`;
+      counter++;
     }
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-const otp = otpGenerator.generate(4, {
-  upperCaseAlphabets: false,
-  lowerCaseAlphabets:false,
-  specialChars: false,
-  alphabets: false, 
-});
-    console.log(otp)
+    const otp = otpGenerator.generate(4, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+      alphabets: false, 
+    });
+    console.log(`[SELLER SIGNUP OTP] Email: ${email} | OTP: ${otp}`);
 
     // Create new seller
     const newSeller = new Seller({
@@ -56,15 +88,17 @@ const otp = otpGenerator.generate(4, {
       password: hashedPassword,
       otp: {
         code: otp,
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000) // OTP expires in 10 minutes
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000)
       }
     });
     
     await newSeller.save();
 
-
-await sendOtpEmail({email,fullname,otp})
-
+    try {
+      await sendOtpEmail({ email, fullname, otp });
+    } catch (mailErr) {
+      console.warn("sendOtpEmail warning (SMTP error, logged OTP to console):", mailErr.message);
+    }
 
     res.status(201).json({
       success: true,

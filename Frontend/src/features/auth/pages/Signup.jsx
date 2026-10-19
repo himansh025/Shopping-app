@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, User, AtSign } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, CheckCircle, AlertCircle, User } from "lucide-react";
 import axiosInstance from "../../../services/apiClient";
 import { toast } from "react-toastify";
 import GoogleLoginButton from "../components/GoogleLoginButton";
@@ -25,16 +25,10 @@ export function Signup() {
     try {
       const endpoint = role === "seller" ? "/seller/signup" : "/user/signup";
       const fullname = (data.fullname || data.name)?.trim();
-      const fallbackUsername = data.email
-        ? data.email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
-        : fullname?.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-      const username = (data.username?.trim() || fallbackUsername || "user").toLowerCase();
-
       const payload = {
         ...data,
         fullname,
         name: fullname,
-        username,
       };
 
       const res = await axiosInstance.post(endpoint, payload);
@@ -95,27 +89,6 @@ export function Signup() {
             )}
           </div>
           {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-        </div>
-
-        {/* Username Field */}
-        <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Username <span className="text-xs text-gray-400 font-normal">(optional, auto-generated if blank)</span>
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <AtSign size={18} className="text-gray-400" />
-            </div>
-            <input
-              {...register("username")}
-              type="text"
-              className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              placeholder="e.g. john_doe"
-            />
-            {dirtyFields.username && !errors.username && (
-              <CheckCircle size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
-            )}
-          </div>
         </div>
 
         {/* Email Field */}

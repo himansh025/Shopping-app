@@ -45,8 +45,12 @@ export function Login() {
         navigate("/");
       }
     } catch (err) {
-      if (err.error) toastCtx?.error?.(err.error);
-      if (err.response?.data?.message) toastCtx?.error?.(err.response.data.message);
+      const errMsg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.error ||
+        "Login failed. Please check your credentials.";
+      toastCtx?.error?.(errMsg);
     } finally {
       setIsLoading(false);
     }

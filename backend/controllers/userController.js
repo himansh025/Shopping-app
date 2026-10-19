@@ -13,7 +13,6 @@ const signup = async (req, res) => {
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password;
     const fullname = (req.body.fullname || req.body.name)?.trim();
-    let username = (req.body.username || email?.split('@')[0] || fullname?.toLowerCase().replace(/\s+/g, ''))?.trim().toLowerCase();
 
     // Validate required fields
     if (!fullname || !email || !password) {
@@ -22,31 +21,29 @@ const signup = async (req, res) => {
       });
     }
 
-    if (!username) {
-      username = email.split('@')[0].replace(/[^a-z0-9]/g, '') + Math.floor(100 + Math.random() * 900);
+    // Check if email already registered
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ error: "Email is already registered. Please log in or use another email." });
     }
 
-    // Check if user exists
-    const userExists = await User.findOne({ 
-      $or: [{ email }, { username }] 
-    });
-    
-    if (userExists) {
-      if (userExists.email === email) {
-        return res.status(400).json({ error: "Email already in use" });
-      } else {
-        return res.status(400).json({ error: "Username already taken" });
-      }
+    // Auto-generate guaranteed unique username
+    const baseUsername = req.body.username?.trim().toLowerCase() || email.split('@')[0].replace(/[^a-z0-9]/g, '') || 'user';
+    let username = baseUsername;
+    let counter = 1;
+    while (await User.findOne({ username })) {
+      username = `${baseUsername}${Math.floor(100 + Math.random() * 900)}${counter}`;
+      counter++;
     }
 
     const otp = otpGenerator.generate(4, {
       upperCaseAlphabets: false,
-      lowerCaseAlphabets:false,
+      lowerCaseAlphabets: false,
       specialChars: false,
       alphabets: false, 
     });
 
-    console.log(otp)
+    console.log(`[USER SIGNUP OTP] Email: ${email} | OTP: ${otp}`);
 
     // Store user data with OTP
     tempUserStore[email] = { 
@@ -58,7 +55,7 @@ const signup = async (req, res) => {
       createdAt: new Date()
     };
 
-    // Set OTP expiration (15 minutes)
+    // Set OTP expiration (10 minutes)
     setTimeout(() => {
       if (tempUserStore[email]) {
         delete tempUserStore[email];
@@ -66,7 +63,11 @@ const signup = async (req, res) => {
     }, 10 * 60 * 1000);
 
     // Prepare email content
-await sendOtpEmail({ email, fullname, otp });
+    try {
+      await sendOtpEmail({ email, fullname, otp });
+    } catch (emailErr) {
+      console.warn("sendOtpEmail warning (SMTP error, logged OTP to console):", emailErr.message);
+    }
 
     // Respond with success
     res.status(200).json({ 
