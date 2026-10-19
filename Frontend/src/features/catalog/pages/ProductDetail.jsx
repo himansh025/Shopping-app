@@ -33,7 +33,12 @@ const FALLBACK_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Crect width='600' height='600' fill='%23f1f5f9'/%3E%3Cpath d='M240 270a30 30 0 1 0 0-60 30 30 0 0 0 0 60zm180 150H180l75-100 50 65 70-90 45 60v65z' fill='%2394a3b8'/%3E%3Ctext x='50%25' y='82%25' dominant-baseline='middle' text-anchor='middle' fill='%2364748b' font-family='sans-serif' font-size='20' font-weight='500'%3ENo Image Available%3C/text%3E%3C/svg%3E";
 
 export function ProductDetail() {
-  const { id } = useParams();
+  const params = useParams();
+  const rawId = params.id;
+  // Extract MongoDB ObjectId if combined in a slug (e.g., name-67cc7f1d4c0e7fe61e7f7518) or use directly
+  const mongoIdMatch = rawId?.match(/[a-f0-9]{24}$/i);
+  const id = mongoIdMatch ? mongoIdMatch[0] : rawId;
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 

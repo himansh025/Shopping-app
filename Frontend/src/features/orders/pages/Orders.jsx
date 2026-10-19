@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Package, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
 import BackArrow from '../../../components/common/BackArrow';
+import { getProductUrl } from '../../../utils/url';
 
 const FALLBACK_IMAGE =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300" fill="%23f1f5f9"><rect width="300" height="300"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-size="14" font-family="sans-serif">No Image Available</text></svg>';
@@ -185,7 +186,7 @@ export const Orders = () => {
                         {item.productId && (
                           <button
                             type="button"
-                            onClick={() => navigate(`/item-detail/${item.productId}`)}
+                            onClick={() => navigate(getProductUrl(item.productId, item.name))}
                             className="text-xs text-blue-600 hover:text-blue-700 font-medium hover:underline flex items-center gap-1 ml-auto"
                           >
                             <span>View Product</span>

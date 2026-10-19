@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { addToWishlist, removeFromWishlist } from '../../../store/slices/wishlistSlice';
 import { addToCart } from '../../../store/slices/cartSlice';
 import axiosInstance from '../../../services/apiClient';
+import { getProductUrl } from '../../../utils/url';
 
 // SVG Placeholder fallback for broken or missing images
 const FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f1f5f9'/%3E%3Cpath d='M160 180a20 20 0 1 0 0-40 20 20 0 0 0 0 40zm120 100H120l50-65 35 45 45-60 30 40v40z' fill='%2394a3b8'/%3E%3Ctext x='50%25' y='82%25' dominant-baseline='middle' text-anchor='middle' fill='%2364748b' font-family='sans-serif' font-size='16' font-weight='500'%3ENo Image Available%3C/text%3E%3C/svg%3E";
@@ -47,7 +48,7 @@ export function ProductCard({ product, className = '' }) {
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
 
   const handleNavigateDetail = () => {
-    navigate(`/item-detail/${productId}`);
+    navigate(getProductUrl(product));
   };
 
   const handleToggleWishlist = async (e) => {

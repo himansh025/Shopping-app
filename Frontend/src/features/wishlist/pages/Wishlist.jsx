@@ -5,6 +5,7 @@ import { removeFromWishlist } from "../../../store/slices/wishlistSlice";
 import { addToCart } from "../../../store/slices/cartSlice";
 import axiosInstance from "../../../services/apiClient";
 import { toast } from "react-toastify";
+import { getProductUrl } from "../../../utils/url";
 
 const FALLBACK_IMAGE =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300" fill="%23f1f5f9"><rect width="300" height="300"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2394a3b8" font-size="14" font-family="sans-serif">No Image Available</text></svg>';
@@ -152,7 +153,7 @@ export function Wishlist() {
                   </span>
                 )}
                 <Link
-                  to={`/item-detail/${id}`}
+                  to={getProductUrl(item, item.name)}
                   className="text-sm font-semibold text-slate-900 hover:text-blue-600 transition-colors line-clamp-2 mb-2"
                 >
                   {item.name}
