@@ -264,25 +264,44 @@ const updateProduct = async (req, res) => {
       });
     }
 
-    // Update image files if provided
-    let imageUrls = [...product.images]; // Start with existing images
+    // Ownership verification: Sellers can ONLY edit their own products
+    const isOwner =
+      product.seller?.sellerId &&
+      product.seller.sellerId.toString() === req.user.id.toString();
+    const isAdmin = req.user && req.user.role === 'admin';
 
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access Denied: You are only permitted to edit your own products.'
+      });
+    }
+
+    // Handle existing images list if passed from frontend
+    let imageUrls = [...product.images];
+    if (req.body.existingImages) {
+      try {
+        imageUrls = typeof req.body.existingImages === 'string'
+          ? JSON.parse(req.body.existingImages)
+          : req.body.existingImages;
+      } catch (err) {
+        console.warn("Could not parse existingImages JSON:", err);
+      }
+    }
+
+    // Process new image uploads if provided
     if (req.files && req.files.length > 0) {
-      // Process new image uploads
-      if (req.files.length > 5) {
+      if (imageUrls.length + req.files.length > 10) {
         return res.status(400).json({
           success: false,
-          message: 'Maximum 5 images allowed'
+          message: 'Maximum 10 images allowed per product'
         });
       }
 
-      // Replace with new images
-      imageUrls = [];
       for (const file of req.files) {
         const uploadResponse = await uploadOnCloudinary(file.path);
-
-        if (uploadResponse && uploadResponse.url) {
-          imageUrls.push(uploadResponse.url);
+        if (uploadResponse && (uploadResponse.secure_url || uploadResponse.url)) {
+          imageUrls.push(uploadResponse.secure_url || uploadResponse.url);
         }
       }
     }
@@ -290,23 +309,18 @@ const updateProduct = async (req, res) => {
     // Build update object
     const updateData = {
       name: name || product.name,
-      price: price || product.price,
+      price: price ? Number(price) : product.price,
       category: category || product.category,
       description: description || product.description,
-      stock: stock || product.stock,
+      stock: stock !== undefined ? Number(stock) : product.stock,
       brand: brand || product.brand,
       images: imageUrls,
-      attributes: parsedAttributes
+      attributes: parsedAttributes || product.attributes,
     };
 
-    // Update seller info if provided
-    if (seller && Object.keys(seller).length > 0) {
-      updateData.seller = {
-        sellerId: seller.sellerId || product.seller.sellerId,
-        name: seller.name || product.seller.name,
-        email: seller.email || product.seller.email,
-        contact: seller.contact || product.seller.contact
-      };
+    // If edited by a seller, set to pending review so admin moderates changes
+    if (!isAdmin) {
+      updateData.approvalStatus = 'pending';
     }
 
     // Update the product
@@ -318,7 +332,9 @@ const updateProduct = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Product updated successfully',
+      message: isAdmin
+        ? 'Product updated successfully'
+        : 'Product updated successfully and submitted for admin review.',
       product
     });
   } catch (error) {
@@ -331,10 +347,11 @@ const updateProduct = async (req, res) => {
 };
 
 
-// Delete product
+// Delete product (Restricted to product owner or admin)
 const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const targetId = req.params.productId || req.params.id;
+    const product = await Product.findById(targetId);
 
     if (!product) {
       return res.status(404).json({
@@ -343,7 +360,20 @@ const deleteProduct = async (req, res) => {
       });
     }
 
-    await Product.findByIdAndDelete(req.params.id);
+    // Ownership verification: Sellers can ONLY delete their own products
+    const isOwner =
+      product.seller?.sellerId &&
+      product.seller.sellerId.toString() === req.user.id.toString();
+    const isAdmin = req.user && req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access Denied: You are only permitted to delete your own products.'
+      });
+    }
+
+    await Product.findByIdAndDelete(targetId);
 
     res.status(200).json({
       success: true,
