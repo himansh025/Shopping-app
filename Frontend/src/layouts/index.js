@@ -12,3 +12,4 @@ export { AdminLayout } from './AdminLayout';
 export { AdminSidebar } from './AdminSidebar';
 export { AdminHeader } from './AdminHeader';
 export { PageContainer } from './PageContainer';
+export { MegaMenu } from './MegaMenu';

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -13,6 +13,8 @@ import {
   Package,
   Store,
   ShieldCheck,
+  ChevronDown,
+  Flame,
 } from 'lucide-react';
 import { logout } from '../store/slices/authSlice';
 import { clearSearch, setProducts } from '../store/slices/productsSlice';
@@ -26,10 +28,16 @@ import {
   DropdownSeparator,
   DropdownLabel,
 } from '../components/ui/Dropdown';
+import MegaMenu from './MegaMenu';
 
 export function CustomerHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [activeMegaMenu, setActiveMegaMenu] = useState(null);
+  const [mobileExpandedGroup, setMobileExpandedGroup] = useState(null);
+  const hoverTimeoutRef = useRef(null);
+
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -42,9 +50,21 @@ export function CustomerHeader() {
     : 0;
   const wishlistCount = Array.isArray(wishlist) ? wishlist.length : 0;
 
+  // Fetch approved catalog categories for mega menu
+  useEffect(() => {
+    axiosInstance
+      .get('/category/all')
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data.categories)) {
+          setCategories(res.data.categories);
+        }
+      })
+      .catch((err) => console.error('Error fetching categories for header:', err));
+  }, []);
+
   // Sync search input with Redux search
   const handleSearchSubmit = async (e) => {
-    if (e) e.preventDefault();
+    e.preventDefault();
     if (!searchQuery.trim()) {
       dispatch(clearSearch());
       return;
@@ -85,20 +105,37 @@ export function CustomerHeader() {
     }
   };
 
-  // Close mobile menu on route change
+  // Close menus on route change
   useEffect(() => {
     setMobileMenuOpen(false);
+    setActiveMegaMenu(null);
   }, [location.pathname]);
 
-  const categoryLinks = [
-    { label: 'All Products', to: '/' },
-    { label: 'Men', to: '/men' },
-    { label: 'Women', to: '/women' },
-    { label: 'Electronics', to: '/electronics' },
+  // Mega menu hover delay logic to prevent accidental close
+  const handleMouseEnter = (key) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setActiveMegaMenu(key);
+  };
+
+  const handleMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setActiveMegaMenu(null);
+    }, 160);
+  };
+
+  const navDepartments = [
+    { key: null, label: 'All Products', to: '/' },
+    { key: 'men', label: 'Men', to: '/men' },
+    { key: 'women', label: 'Women', to: '/women' },
+    { key: 'kids', label: 'Kids', to: '/boy' },
+    { key: 'electronics', label: 'Electronics', to: '/electronics' },
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+    <header
+      className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs"
+      onMouseLeave={handleMouseLeave}
+    >
       {/* Top Main Navigation Bar */}
       <PageContainer>
         <div className="flex items-center justify-between h-16 gap-4">
@@ -267,33 +304,73 @@ export function CustomerHeader() {
         </div>
       </PageContainer>
 
-      {/* Category Navigation Bar (Desktop) */}
-      <div className="hidden md:block border-t border-slate-100 bg-slate-50/50">
+      {/* Category Navigation Bar (Desktop) with Mega Menu Triggers */}
+      <div className="hidden md:block border-t border-slate-100 bg-slate-50/70 relative">
         <PageContainer>
-          <nav className="flex items-center gap-8 h-10 text-xs font-medium">
-            {categoryLinks.map((cat) => (
-              <NavLink
-                key={cat.to}
-                to={cat.to}
-                end={cat.to === '/'}
-                className={({ isActive }) =>
-                  `h-full flex items-center transition-colors border-b-2 pt-0.5 ${
-                    isActive
-                      ? 'border-blue-600 text-blue-600 font-semibold'
-                      : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-                  }`
-                }
+          <nav className="flex items-center justify-between h-11 text-xs font-medium">
+            <div className="flex items-center gap-1 lg:gap-2 h-full">
+              {navDepartments.map((dept) => {
+                const isActive = activeMegaMenu === dept.key;
+                return (
+                  <div
+                    key={dept.label}
+                    className="h-full flex items-center relative"
+                    onMouseEnter={() => dept.key && handleMouseEnter(dept.key)}
+                  >
+                    <NavLink
+                      to={dept.to}
+                      end={dept.to === '/'}
+                      className={({ isActive: isRouteActive }) =>
+                        `h-full px-3.5 flex items-center gap-1.5 transition-all border-b-2 font-semibold ${
+                          isActive || isRouteActive
+                            ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                            : 'border-transparent text-slate-700 hover:text-slate-950 hover:bg-slate-100/70'
+                        }`
+                      }
+                    >
+                      <span>{dept.label}</span>
+                      {dept.key && (
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                            isActive ? 'rotate-180 text-blue-600' : 'text-slate-400'
+                          }`}
+                        />
+                      )}
+                    </NavLink>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right Promo / Sale Quick Link */}
+            <div className="flex items-center gap-3">
+              <Link
+                to="/category/Men's Clothing"
+                className="flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 transition-colors py-1 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-100/80 border border-rose-200/60"
               >
-                {cat.label}
-              </NavLink>
-            ))}
+                <Flame className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+                <span>CLEARANCE SALE</span>
+                <span className="text-[10px] bg-rose-600 text-white px-1.5 py-0.2 rounded font-extrabold ml-1">
+                  UP TO 50%
+                </span>
+              </Link>
+            </div>
           </nav>
         </PageContainer>
+
+        {/* Desktop Mega Menu Dropdown */}
+        {activeMegaMenu && (
+          <MegaMenu
+            activeKey={activeMegaMenu}
+            categories={categories}
+            onClose={() => setActiveMegaMenu(null)}
+          />
+        )}
       </div>
 
-      {/* Mobile Drawer Navigation */}
+      {/* Mobile Drawer Navigation with Accordion Mega Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-4 shadow-lg animate-in slide-in-from-top-2 duration-150">
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto animate-in slide-in-from-top-2 duration-150">
           {/* Mobile Search Input */}
           <form onSubmit={handleSearchSubmit} className="relative w-full">
             <input
@@ -306,34 +383,94 @@ export function CustomerHeader() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           </form>
 
-          {/* Mobile Category Links */}
+          {/* Mobile Category Links with Accordion Subcategories */}
           <div className="space-y-1 border-t border-slate-100 pt-3">
             <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              Categories
+              Departments &amp; Categories
             </div>
-            {categoryLinks.map((cat) => (
-              <NavLink
-                key={cat.to}
-                to={cat.to}
-                end={cat.to === '/'}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  `block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-600 font-semibold'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`
-                }
-              >
-                {cat.label}
-              </NavLink>
-            ))}
+
+            <NavLink
+              to="/"
+              end
+              onClick={() => setMobileMenuOpen(false)}
+              className={({ isActive }) =>
+                `block px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                  isActive ? 'bg-blue-50 text-blue-600' : 'text-slate-800 hover:bg-slate-100'
+                }`
+              }
+            >
+              All Products
+            </NavLink>
+
+            {/* Accordion for Departments */}
+            {[
+              { key: 'Men', label: 'Men’s Fashion', to: '/men' },
+              { key: 'Women', label: 'Women’s Luxury', to: '/women' },
+              { key: 'Kids', label: 'Kids & Teens', to: '/boy' },
+              { key: 'Electronics', label: 'Electronics & Audio', to: '/electronics' },
+            ].map((dept) => {
+              const isExpanded = mobileExpandedGroup === dept.key;
+              const subCats = categories.filter((c) => {
+                if (dept.key === 'Kids') return ['Boy', 'Girl'].includes(c.parentCategory);
+                return c.parentCategory === dept.key;
+              });
+
+              return (
+                <div key={dept.key} className="rounded-xl border border-slate-100 overflow-hidden">
+                  <div className="flex items-center justify-between bg-slate-50/70 px-3 py-2">
+                    <NavLink
+                      to={dept.to}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-sm font-semibold text-slate-800 hover:text-blue-600"
+                    >
+                      {dept.label}
+                    </NavLink>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMobileExpandedGroup(isExpanded ? null : dept.key)
+                      }
+                      className="p-1 text-slate-500 hover:text-slate-800"
+                      aria-label="Expand department"
+                    >
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform ${
+                          isExpanded ? 'rotate-180 text-blue-600' : ''
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="p-2 space-y-1 bg-white border-t border-slate-100">
+                      {subCats.map((cat) => (
+                        <Link
+                          key={cat._id || cat.name}
+                          to={`/category/${encodeURIComponent(cat.name)}`}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg"
+                        >
+                          {cat.name}
+                        </Link>
+                      ))}
+                      <Link
+                        to={dept.to}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-3 py-1.5 text-xs font-bold text-blue-600"
+                      >
+                        Explore All {dept.label} →
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Mobile Account Links */}
           <div className="space-y-1 border-t border-slate-100 pt-3">
             <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              Account & Orders
+              Account &amp; Orders
             </div>
             {user ? (
               <>
