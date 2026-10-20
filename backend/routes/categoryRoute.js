@@ -11,18 +11,18 @@ const {
 } = require("../controllers/categoryController");
 const {
   authMiddleware,
-  authorizeseller,
+  authorizeAdmin,
 } = require("../middleware/authMiddleware");
 
-// Public endpoints
+// Public endpoints (Viewable by customers and sellers)
 router.get("/all", getAllCategories);
 router.get("/:id", getCategoryById);
 
-// Seller/Admin protected endpoints
+// Admin-ONLY management endpoints (Only admin can create, update, delete, seed categories)
 router.post(
   "/create",
   authMiddleware,
-  authorizeseller,
+  authorizeAdmin,
   upload.single("image"),
   createCategory
 );
@@ -30,7 +30,7 @@ router.post(
 router.put(
   "/update/:id",
   authMiddleware,
-  authorizeseller,
+  authorizeAdmin,
   upload.single("image"),
   updateCategory
 );
@@ -38,14 +38,14 @@ router.put(
 router.delete(
   "/delete/:id",
   authMiddleware,
-  authorizeseller,
+  authorizeAdmin,
   deleteCategory
 );
 
 router.post(
   "/seed",
   authMiddleware,
-  authorizeseller,
+  authorizeAdmin,
   seedDefaultCategories
 );
 

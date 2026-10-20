@@ -247,24 +247,48 @@ export function EditProducts({ product, onClose, onSuccess }) {
               )}
             </div>
 
+            {/* Platform Curated Category Select */}
             <div>
-              <label
-                htmlFor="edit-category"
-                className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide"
-              >
-                Category <span className="text-rose-500">*</span>
-              </label>
-              <input
-                id="edit-category"
-                list="category-edit-suggestions"
-                {...register("category")}
-                className="w-full px-4 py-2.5 text-sm bg-white rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all focus:outline-none"
-              />
-              <datalist id="category-edit-suggestions">
-                {availableCategories.map((c) => (
-                  <option key={c._id || c.name} value={c.name} />
-                ))}
-              </datalist>
+              <div className="flex items-center justify-between mb-1.5">
+                <label
+                  htmlFor="edit-category"
+                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wide"
+                >
+                  Platform Category <span className="text-rose-500">*</span>
+                </label>
+                <span className="text-[10px] text-slate-400 font-medium">Admin Curated</span>
+              </div>
+              <div className="relative">
+                <select
+                  id="edit-category"
+                  {...register("category")}
+                  className="w-full px-4 py-2.5 text-sm bg-white rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all focus:outline-none text-slate-800"
+                >
+                  <option value="">Select Platform Category...</option>
+                  {POPULAR_TYPES.map((parent) => {
+                    const groupCats = availableCategories.filter(
+                      (c) => c.parentCategory === parent
+                    );
+                    if (groupCats.length === 0) return null;
+                    return (
+                      <optgroup key={parent} label={`── ${parent} Department ──`}>
+                        {groupCats.map((c) => (
+                          <option key={c._id || c.name} value={c.name}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    );
+                  })}
+                  {availableCategories
+                    .filter((c) => !POPULAR_TYPES.includes(c.parentCategory))
+                    .map((c) => (
+                      <option key={c._id || c.name} value={c.name}>
+                        {c.name} ({c.parentCategory || "General"})
+                      </option>
+                    ))}
+                </select>
+              </div>
               {errors.category && (
                 <p className="text-xs text-rose-500 mt-1">{errors.category.message}</p>
               )}

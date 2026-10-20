@@ -280,33 +280,51 @@ export function AddProducts({ onClose, onSuccess }) {
               )}
             </div>
 
-            {/* Category with Dropdown Suggestions */}
+            {/* Curated Admin Category Selector */}
             <div>
-              <label
-                htmlFor="category"
-                className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide"
-              >
-                Category <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label
+                  htmlFor="category"
+                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wide"
+                >
+                  Platform Category <span className="text-rose-500">*</span>
+                </label>
+                <span className="text-[10px] text-slate-400 font-medium">Admin Curated</span>
+              </div>
               <div className="relative">
-                <input
+                <select
                   id="category"
-                  list="category-suggestions"
                   {...register("category")}
-                  placeholder="Select or enter category..."
-                  className={`w-full px-4 py-2.5 text-sm bg-white rounded-xl border transition-all placeholder:text-slate-400 focus:outline-none focus:ring-4 ${
+                  className={`w-full px-4 py-2.5 text-sm bg-white rounded-xl border transition-all text-slate-800 focus:outline-none focus:ring-4 ${
                     errors.category
                       ? "border-rose-300 focus:border-rose-500 focus:ring-rose-500/10"
                       : "border-slate-200 focus:border-indigo-600 focus:ring-indigo-500/10"
                   }`}
-                />
-                <datalist id="category-suggestions">
-                  {availableCategories.map((c) => (
-                    <option key={c._id || c.name} value={c.name}>
-                      {c.name} ({c.parentCategory})
-                    </option>
-                  ))}
-                </datalist>
+                >
+                  <option value="">Select Platform Category...</option>
+                  {POPULAR_TYPES.map((parent) => {
+                    const groupCats = availableCategories.filter(
+                      (c) => c.parentCategory === parent
+                    );
+                    if (groupCats.length === 0) return null;
+                    return (
+                      <optgroup key={parent} label={`── ${parent} Department ──`}>
+                        {groupCats.map((c) => (
+                          <option key={c._id || c.name} value={c.name}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    );
+                  })}
+                  {availableCategories
+                    .filter((c) => !POPULAR_TYPES.includes(c.parentCategory))
+                    .map((c) => (
+                      <option key={c._id || c.name} value={c.name}>
+                        {c.name} ({c.parentCategory || "General"})
+                      </option>
+                    ))}
+                </select>
               </div>
               {errors.category && (
                 <p className="text-xs text-rose-500 mt-1 font-medium">

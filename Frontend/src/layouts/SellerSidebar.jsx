@@ -33,7 +33,7 @@ export function SellerSidebar({ mobileOpen, setMobileOpen }) {
   const navItems = [
     { label: 'Dashboard', to: '/', icon: LayoutDashboard, end: true },
     { label: 'Add Product', to: '/add', icon: PlusCircle, end: false },
-    { label: 'Categories', to: '/categories', icon: Tags, end: false },
+    { label: 'Browse Categories', to: '/categories', icon: Tags, end: false },
     { label: 'Manage Orders', to: '/orders', icon: Package, end: false },
     { label: 'Seller Profile', to: '/profile', icon: UserCircle, end: false },
   ];

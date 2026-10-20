@@ -39,10 +39,12 @@ const createCategory = async (req, res) => {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
 
-    const isAdmin = req.user && req.user.role === 'admin';
-    const approvalStatus = isAdmin ? 'approved' : 'pending';
-    const createdByRole = isAdmin ? 'admin' : 'seller';
-    const createdByName = isAdmin ? 'Admin' : (req.user?.fullname || req.user?.businessName || 'Seller');
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Only platform administrators are authorized to create categories.",
+      });
+    }
 
     const newCategory = new Category({
       name: trimmedName,
@@ -51,18 +53,16 @@ const createCategory = async (req, res) => {
       parentCategory: parentCategory || "Other",
       status: status || "active",
       image: imageUrl,
-      approvalStatus,
-      createdByRole,
-      createdByName,
+      approvalStatus: "approved",
+      createdByRole: "admin",
+      createdByName: req.user?.fullname || "Administrator",
     });
 
     const savedCategory = await newCategory.save();
 
     res.status(201).json({
       success: true,
-      message: isAdmin
-        ? "Category created and approved successfully!"
-        : "Category submitted for review! It will be available once approved by administrator.",
+      message: "Category created and approved successfully!",
       category: savedCategory,
     });
   } catch (error) {
@@ -180,6 +180,13 @@ const getCategoryById = async (req, res) => {
 // Update category
 const updateCategory = async (req, res) => {
   try {
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Only platform administrators are authorized to update categories.",
+      });
+    }
+
     const { id } = req.params;
     const { name, description, parentCategory, status, image } = req.body;
 
@@ -255,6 +262,13 @@ const updateCategory = async (req, res) => {
 // Delete category
 const deleteCategory = async (req, res) => {
   try {
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Only platform administrators are authorized to delete categories.",
+      });
+    }
+
     const { id } = req.params;
 
     const category = await Category.findById(id);
@@ -290,6 +304,12 @@ const deleteCategory = async (req, res) => {
 // Seed default categories matching existing products
 const seedDefaultCategories = async (req, res) => {
   try {
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Only platform administrators can seed categories.",
+      });
+    }
     const defaultCategories = [
       {
         name: "Men's Shoes",
